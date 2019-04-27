@@ -16,7 +16,7 @@ template <typename T> class SampleQueueProducer {
 
 public:
   void push(T &&element) { queue.push(std::move(element)); }
-  bool canPush() { return queue->write_available() > 0; }
+  bool canPush() { return queue.write_available() > 0; }
   void close() { closed = true; }
 
   SampleQueueProducer(queue_impl<T> &queue, bool &closed)
@@ -56,7 +56,7 @@ public:
   };
 
   size_t size() const { 
-      std::cout  << "Size " << (int) queue->read_available() << std::endl;
+      // std::cout  << "Size " << (int) queue->read_available() << std::endl;
       return queue->read_available(); 
   }
 
@@ -69,7 +69,7 @@ public:
   static auto makeQueue() {
     SampleQueueConsumer<T> consumer;
     SampleQueueProducer<T> producer(*consumer.queue, *consumer.closed);
-    return std::make_tuple(std::move(producer), std::move(consumer));
+    return std::make_pair(std::move(producer), std::move(consumer));
   }
 };
 
