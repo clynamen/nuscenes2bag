@@ -1,4 +1,4 @@
-#include "nuscenes2rosbag/SampleSetDescriptor.hpp"
+#include "nuscenes2bag/SampleSetDescriptor.hpp"
 
 #include <string>
 #include "ros/ros.h"

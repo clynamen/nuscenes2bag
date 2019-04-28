@@ -1,4 +1,4 @@
-#include "nuscenes2rosbag/MyProcessor.hpp"
+#include "nuscenes2bag/MyProcessor.hpp"
 
 MyProcessor::MyProcessor(const std::string& bagName) {
   outBag.open(bagName, rosbag::bagmode::Write);

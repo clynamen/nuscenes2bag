@@ -1,4 +1,4 @@
-#include "nuscenes2rosbag/SampleSetDescriptor.hpp"
+#include "nuscenes2bag/SampleSetDescriptor.hpp"
 
 // SampleSetDescriptor::SampleSetDescriptor(
 //     const std::string_view& directoryName, SampleSetType setType) 

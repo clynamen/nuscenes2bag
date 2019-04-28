@@ -1,4 +1,4 @@
-#include "nuscenes2rosbag/SampleSetDirectoryConverter.hpp"
+#include "nuscenes2bag/SampleSetDirectoryConverter.hpp"
 
 #include <iostream>
 

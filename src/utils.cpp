@@ -1,4 +1,4 @@
-#include "nuscenes2rosbag/utils.hpp"
+#include "nuscenes2bag/utils.hpp"
 
 std::string toLower(const std::string_view& str) {
   std::string lowerStr;

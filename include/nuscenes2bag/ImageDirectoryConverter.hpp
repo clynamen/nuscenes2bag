@@ -1,8 +1,8 @@
 #pragma once
 
-#include "nuscenes2rosbag/SampleQueue.hpp"
-#include "nuscenes2rosbag/SampleSetDirectoryConverter.hpp"
-#include "nuscenes2rosbag/utils.hpp"
+#include "nuscenes2bag/SampleQueue.hpp"
+#include "nuscenes2bag/SampleSetDirectoryConverter.hpp"
+#include "nuscenes2bag/utils.hpp"
 #include "sensor_msgs/Image.h"
 
 #include <cv_bridge/cv_bridge.h>

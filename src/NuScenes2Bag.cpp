@@ -1,8 +1,8 @@
-#include "nuscenes2rosbag/NuScenes2Rosbag.hpp"
-#include "nuscenes2rosbag/SampleQueue.hpp"
-#include "nuscenes2rosbag/utils.hpp"
-#include "nuscenes2rosbag/ImageDirectoryConverter.hpp"
-#include "nuscenes2rosbag/MyProcessor.hpp"
+#include "nuscenes2bag/NuScenes2Bag.hpp"
+#include "nuscenes2bag/SampleQueue.hpp"
+#include "nuscenes2bag/utils.hpp"
+#include "nuscenes2bag/ImageDirectoryConverter.hpp"
+#include "nuscenes2bag/MyProcessor.hpp"
 
 #include <boost/asio.hpp>
 
@@ -16,11 +16,11 @@
 
 namespace fs = std::filesystem;
 
-NuScenes2Rosbag::NuScenes2Rosbag() {}
+NuScenes2Bag::NuScenes2Bag() {}
 
 
 std::optional<FileSystemSampleSet>
-NuScenes2Rosbag::extractSampleSetDescriptorInDirectory(
+NuScenes2Bag::extractSampleSetDescriptorInDirectory(
     const std::filesystem::path &inDirectoryPath) {
   const std::string &dirName = inDirectoryPath.filename();
 
@@ -46,7 +46,7 @@ NuScenes2Rosbag::extractSampleSetDescriptorInDirectory(
   return std::nullopt;
 }
 
-std::vector<FileSystemSampleSet> NuScenes2Rosbag::getSampleSetsInDirectory(
+std::vector<FileSystemSampleSet> NuScenes2Bag::getSampleSetsInDirectory(
     const std::filesystem::path &inDatasetPath) {
   std::vector<FileSystemSampleSet> sets;
 
@@ -62,7 +62,7 @@ std::vector<FileSystemSampleSet> NuScenes2Rosbag::getSampleSetsInDirectory(
   return sets;
 }
 
-std::vector<FileSystemSampleSet> NuScenes2Rosbag::filterChosenSampleSets(
+std::vector<FileSystemSampleSet> NuScenes2Bag::filterChosenSampleSets(
     const std::vector<FileSystemSampleSet> &sampleSets) {
   std::vector<FileSystemSampleSet> filteredSets;
   std::copy_if(sampleSets.begin(), sampleSets.end(),
@@ -74,11 +74,11 @@ std::vector<FileSystemSampleSet> NuScenes2Rosbag::filterChosenSampleSets(
   return filteredSets;
 }
 
-// SampleSetDirectoryConverter&& NuScenes2Rosbag::prepareConverter() {
+// SampleSetDirectoryConverter&& NuScenes2Bag::prepareConverter() {
 
 // }
 
-void NuScenes2Rosbag::processSampleSets(
+void NuScenes2Bag::processSampleSets(
   const std::vector<FileSystemSampleSet>& sampleSets, 
   const std::filesystem::path &outputRosbagPath) {
 
@@ -129,7 +129,7 @@ void NuScenes2Rosbag::processSampleSets(
   pool.join();
 }
 
-void NuScenes2Rosbag::convertDirectory(
+void NuScenes2Bag::convertDirectory(
     const std::filesystem::path &inDatasetPath,
     const std::filesystem::path &outputRosbagPath) {
 

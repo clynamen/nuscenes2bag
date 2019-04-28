@@ -2,16 +2,16 @@
 
 #include <rosbag/bag.h>
 
-#include "nuscenes2rosbag/SampleSetDescriptor.hpp"
+#include "nuscenes2bag/SampleSetDescriptor.hpp"
 
 #include <filesystem>
 #include <optional>
 #include <vector>
 
-struct NuScenes2Rosbag {
+struct NuScenes2Bag {
 
 public:
-  NuScenes2Rosbag();
+  NuScenes2Bag();
 
   void convertDirectory(const std::filesystem::path &inDatasetPath,
                         const std::filesystem::path &outputRosbagPath);

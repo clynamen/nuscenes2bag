@@ -1,7 +1,7 @@
 #pragma once
 
-#include "nuscenes2rosbag/SampleQueue.hpp"
-#include "nuscenes2rosbag/SampleSetWorker.hpp"
+#include "nuscenes2bag/SampleQueue.hpp"
+#include "nuscenes2bag/SampleSetWorker.hpp"
 
 #include "rosbag/bag.h"
 

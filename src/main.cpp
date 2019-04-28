@@ -1,4 +1,4 @@
-#include "nuscenes2rosbag/NuScenes2Rosbag.hpp"
+#include "nuscenes2bag/NuScenes2Bag.hpp"
 #include <boost/program_options.hpp>
 
 using namespace boost::program_options;
@@ -25,7 +25,7 @@ int main(const int argc, const char *argv[]) {
     if (vm.count("help")) {
       std::cout << desc << '\n';
     } else {
-      NuScenes2Rosbag converter{};
+      NuScenes2Bag converter{};
 
       converter.convertDirectory(sampleDir, outputBagName);
     }

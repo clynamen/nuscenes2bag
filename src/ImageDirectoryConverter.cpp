@@ -1,5 +1,5 @@
-#include "nuscenes2rosbag/ImageDirectoryConverter.hpp"
-#include "nuscenes2rosbag/utils.hpp"
+#include "nuscenes2bag/ImageDirectoryConverter.hpp"
+#include "nuscenes2bag/utils.hpp"
 #include <thread>
 
 namespace fs = std::filesystem;
