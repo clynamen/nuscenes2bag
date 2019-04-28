@@ -138,6 +138,7 @@ set(SRCS
     src/SampleSetDirectoryConverter.cpp
     src/SampleQueue.cpp
     src/MyProcessor.cpp
+    src/FileProgress.cpp
     src/utils.cpp
 )
 

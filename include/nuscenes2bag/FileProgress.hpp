@@ -2,7 +2,15 @@
 
 class FileProgress {
     public:
+        FileProgress();
 
-    private:
-        std::atomic_long 
+        void addToProcess(uint32_t toProcess);
+
+        void addToProcessed(uint32_t processed);
+
+        float getProgressPercentage();
+
+    public:
+        std::atomic<uint32_t> processedFiles;
+        std::atomic<uint32_t> toProcessFiles;
 };

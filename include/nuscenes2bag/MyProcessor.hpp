@@ -15,7 +15,8 @@ public:
 
     if(imageOpt.has_value()) {
       sensor_msgs::Image image = imageOpt.value();
-      std::cout << "writing " << topicInfo.topicName << " at " << image.header.stamp << std::endl;
+
+      //std::cout << "writing " << topicInfo.topicName << " at " << image.header.stamp << std::endl;
       outBag.write(topicInfo.topicName, image.header.stamp, image);
     }
 

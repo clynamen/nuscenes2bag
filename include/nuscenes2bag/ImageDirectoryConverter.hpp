@@ -3,6 +3,7 @@
 #include "nuscenes2bag/SampleQueue.hpp"
 #include "nuscenes2bag/SampleSetDirectoryConverter.hpp"
 #include "nuscenes2bag/utils.hpp"
+#include "nuscenes2bag/FileProgress.hpp"
 #include "sensor_msgs/Image.h"
 
 #include <cv_bridge/cv_bridge.h>
@@ -23,10 +24,16 @@ template <class T>
 class MsgDirectoryConverter : public SampleSetDirectoryConverter {
 public:
   MsgDirectoryConverter(SampleQueueProducer<T> &&queue,
-                        const std::filesystem::path &path) :  SampleSetDirectoryConverter(path), queue(queue) {}
+                        FileProgress& fileProgress,
+                        const std::filesystem::path &path) :  
+                        SampleSetDirectoryConverter(path), 
+                        fileProgress(fileProgress),
+                        queue(queue) {}
 
   void processInternal() override {
     auto files = getFilesInSampleSetDirectoryOrderedByTime(directoryPath);
+    std::cout << "Adding " << files.size() << " to process " << std::endl;
+    fileProgress.addToProcess(files.size());
 
     for (const auto &file : files) {
       if (!isRunning()) {
@@ -38,6 +45,7 @@ public:
       while (true) {
         if (queue.canPush()) {
           queue.push(std::move(msg));
+          fileProgress.addToProcessed(1);
           break;
         } else if (!isRunning()) {
           break;
@@ -55,6 +63,7 @@ public:
     return processSingleFileFun<T>(fileInfo);
   }
 
+  FileProgress& fileProgress;
   SampleQueueProducer<T> queue;
 };
 
