@@ -12,6 +12,7 @@
 #include <std_msgs/Int32.h>
 #include <std_msgs/String.h>
 #include <thread>
+#include <array>
 
 namespace fs = std::filesystem;
 
@@ -22,18 +23,26 @@ std::optional<FileSystemSampleSet>
 NuScenes2Rosbag::extractSampleSetDescriptorInDirectory(
     const std::filesystem::path &inDirectoryPath) {
   const std::string &dirName = inDirectoryPath.filename();
-  if (string_icontains(dirName, "CAM")) {
-    return std::optional<FileSystemSampleSet>{
-        {{dirName, SampleSetType::CAMERA}, inDirectoryPath}};
-  } else if (string_icontains(dirName, "RADAR")) {
-    return std::optional<FileSystemSampleSet>{
-        {{dirName, SampleSetType::RADAR}, inDirectoryPath}};
-  } else if (string_icontains(dirName, "LIDAR")) {
-    return std::optional<FileSystemSampleSet>{
-        {{dirName, SampleSetType::LIDAR}, inDirectoryPath}};
-  } else {
-    std::cout << "Skipping " << inDirectoryPath << std::endl;
+
+  struct InfoPreset {
+    const char* name;
+    const SampleSetType sampleType;
+  };
+
+  static std::array<InfoPreset, 3> presets {
+    "CAM",   SampleSetType::CAMERA,
+    "RADAR", SampleSetType::RADAR,
+    "LIDAR", SampleSetType::LIDAR,
+  };
+
+  for(auto& preset : presets) {
+    if(string_icontains(dirName, preset.name)) {
+      return std::optional<FileSystemSampleSet>{
+          {{dirName, preset.sampleType}, inDirectoryPath}};
+    }
   }
+
+  std::cout << "Skipping " << inDirectoryPath << std::endl;
   return std::nullopt;
 }
 
@@ -58,50 +67,46 @@ std::vector<FileSystemSampleSet> NuScenes2Rosbag::filterChosenSampleSets(
   std::vector<FileSystemSampleSet> filteredSets;
   std::copy_if(sampleSets.begin(), sampleSets.end(),
                std::back_inserter(filteredSets), [](auto &fileSystemSampleSet) {
-                 return fileSystemSampleSet.descriptor.setType >=
+                 return fileSystemSampleSet.descriptor.setType ==
                         SampleSetType::CAMERA;
                });
+
   return filteredSets;
 }
 
+// SampleSetDirectoryConverter&& NuScenes2Rosbag::prepareConverter() {
 
-void NuScenes2Rosbag::convertDirectory(
-    const std::filesystem::path &inDatasetPath,
-    const std::filesystem::path &outputRosbagPath) {
-  //   rosbag::Bag outBag;
-  //   outBag.open(outputRosbagPath.string(), rosbag::bagmode::Write);
+// }
 
-  auto availableSampleSets = getSampleSetsInDirectory(inDatasetPath);
-  std::cout << "Found " << availableSampleSets.size()
-            << " valid sample directory" << std::endl;
-
-  auto chosenSets = filterChosenSampleSets(availableSampleSets);
-  std::cout << "Chosen " << chosenSets.size() << " sample directory"
-            << std::endl;
+void NuScenes2Rosbag::processSampleSets(
+  const std::vector<FileSystemSampleSet>& sampleSets, 
+  const std::filesystem::path &outputRosbagPath) {
 
   std::vector<std::pair<TopicInfo, TypeErasedQueue>> typeErasedQueueList;
   std::vector<std::unique_ptr<SampleSetDirectoryConverter>> sampleSetConverters;
+
   // Launch the pool with four threads.
   boost::asio::thread_pool pool(6);
 
-  for (const auto &chosenSet : chosenSets) {
-    if (chosenSet.descriptor.setType == SampleSetType::CAMERA) {
+  for (const auto &sampleSet : sampleSets) {
 
-      auto queueProducerConsumerPair =
-          SampleQueueFactory<sensor_msgs::Image>::makeQueue();
+    auto queueProducerConsumerPair =
+        SampleQueueFactory<sensor_msgs::Image>::makeQueue();
+    typeErasedQueueList.emplace_back(
+        TopicInfo(topicNameForSampleSetType(
+          sampleSet.descriptor.directoryName, sampleSet.descriptor.setType)),
+        TypeErasedQueue(queueProducerConsumerPair.second));
 
+    if (sampleSet.descriptor.setType == SampleSetType::CAMERA) {
       // check if value is really moved here
-      typeErasedQueueList.emplace_back(
-          TopicInfo(topicNameForCamera(chosenSet.descriptor.directoryName)),
-          TypeErasedQueue(queueProducerConsumerPair.second));
-
-      sampleSetConverters.push_back(std::make_unique<ImageDirectoryConverter>(
-          std::move(queueProducerConsumerPair.first), chosenSet.directoryPath));
-      SampleSetDirectoryConverter* converter = sampleSetConverters.back().get();
-
-      boost::asio::post(pool, [converter]() { converter->process(); });
+      sampleSetConverters.push_back(std::make_unique<MsgDirectoryConverter<sensor_msgs::Image>>(
+          std::move(queueProducerConsumerPair.first), sampleSet.directoryPath));
+    } else {
+      throw std::runtime_error("Not supported SampleSetType");
     }
   }
+  SampleSetDirectoryConverter* converter = sampleSetConverters.back().get();
+  boost::asio::post(pool, [converter]() { converter->process(); });
 
   fs::remove(outputRosbagPath);
 
@@ -122,5 +127,19 @@ void NuScenes2Rosbag::convertDirectory(
   }
 
   pool.join();
+}
 
+void NuScenes2Rosbag::convertDirectory(
+    const std::filesystem::path &inDatasetPath,
+    const std::filesystem::path &outputRosbagPath) {
+
+  auto availableSampleSets = getSampleSetsInDirectory(inDatasetPath);
+  std::cout << "Found " << availableSampleSets.size()
+            << " valid sample directory" << std::endl;
+
+  auto chosenSets = filterChosenSampleSets(availableSampleSets);
+  std::cout << "Chosen " << chosenSets.size() << " sample directory"
+            << std::endl;
+
+  processSampleSets(chosenSets, outputRosbagPath);
 }

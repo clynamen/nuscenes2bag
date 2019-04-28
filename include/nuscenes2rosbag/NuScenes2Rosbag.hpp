@@ -10,23 +10,25 @@
 
 struct NuScenes2Rosbag {
 
-    public:
-        NuScenes2Rosbag();
+public:
+  NuScenes2Rosbag();
 
-        void convertDirectory(const std::filesystem::path& inDatasetPath,
-            const std::filesystem::path& outputRosbagPath);
+  void convertDirectory(const std::filesystem::path &inDatasetPath,
+                        const std::filesystem::path &outputRosbagPath);
 
-        std::optional<FileSystemSampleSet> extractSampleSetDescriptorInDirectory(
-            const std::filesystem::path& inDirectoryPath);
+  std::optional<FileSystemSampleSet> extractSampleSetDescriptorInDirectory(
+      const std::filesystem::path &inDirectoryPath);
 
-        std::vector<FileSystemSampleSet> getSampleSetsInDirectory(
-            const std::filesystem::path& inDatasetPath
-        );
+  std::vector<FileSystemSampleSet>
+  getSampleSetsInDirectory(const std::filesystem::path &inDatasetPath);
 
-        std::vector<FileSystemSampleSet> filterChosenSampleSets(
-            const std::vector<FileSystemSampleSet>& sampleSet);
+  std::vector<FileSystemSampleSet>
+  filterChosenSampleSets(const std::vector<FileSystemSampleSet> &sampleSet);
 
-    private:
-        std::string inDatasetPathString;
+  void processSampleSets(
+      const std::vector<FileSystemSampleSet> &sampleSets,
+      const std::filesystem::path &outputRosbagPath);
 
+private:
+  std::string inDatasetPathString;
 };
