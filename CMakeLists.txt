@@ -132,8 +132,13 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 
 set(SRCS
+    src/ImageDirectoryConverter.cpp
     src/NuScenes2Rosbag.cpp
     src/SampleSetDescriptor.cpp
+    src/SampleSetDirectoryConverter.cpp
+    src/SampleQueue.cpp
+    src/MyProcessor.cpp
+    src/utils.cpp
 )
 
 add_executable(${PROJECT_NAME} src/main.cpp ${SRCS})

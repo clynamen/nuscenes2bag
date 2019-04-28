@@ -1,15 +1,13 @@
 #include "nuscenes2rosbag/NuScenes2Rosbag.hpp"
 #include "nuscenes2rosbag/SampleQueue.hpp"
+#include "nuscenes2rosbag/utils.hpp"
+#include "nuscenes2rosbag/ImageDirectoryConverter.hpp"
+#include "nuscenes2rosbag/MyProcessor.hpp"
 
 #include <boost/asio.hpp>
 
-#include <cv_bridge/cv_bridge.h>
-
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgcodecs.hpp>
 
 #include <iostream>
-#include <regex>
 
 #include <std_msgs/Int32.h>
 #include <std_msgs/String.h>
@@ -19,16 +17,6 @@ namespace fs = std::filesystem;
 
 NuScenes2Rosbag::NuScenes2Rosbag() {}
 
-bool string_icontains(const std::string_view &string,
-                      const std::string_view &sub) {
-  std::string lowerString;
-  std::string lowerSub;
-  std::transform(string.begin(), string.end(), std::back_inserter(lowerString),
-                 ::tolower);
-  std::transform(sub.begin(), sub.end(), std::back_inserter(lowerSub),
-                 ::tolower);
-  return lowerString.find(lowerSub) != std::string::npos;
-}
 
 std::optional<FileSystemSampleSet>
 NuScenes2Rosbag::extractSampleSetDescriptorInDirectory(
@@ -76,174 +64,6 @@ std::vector<FileSystemSampleSet> NuScenes2Rosbag::filterChosenSampleSets(
   return filteredSets;
 }
 
-class MyProcessor : public SampleMsgProcessor {
-public:
-  MyProcessor(const std::string& bagName);
-
-  virtual void process(const TopicInfo &topicInfo,
-                       SampleQueueConsumer<sensor_msgs::Image> &queueConsumer) {
-    std::optional<sensor_msgs::Image> imageOpt = queueConsumer.get();
-
-    if(imageOpt.has_value()) {
-      sensor_msgs::Image image = imageOpt.value();
-      std::cout << "writing " << topicInfo.topicName << " at " << image.header.stamp << std::endl;
-      outBag.write(topicInfo.topicName, image.header.stamp, image);
-    }
-
-  };
-
-  virtual ~MyProcessor();
-  rosbag::Bag outBag;
-};
-
-MyProcessor::MyProcessor(const std::string& bagName) {
-  outBag.open(bagName, rosbag::bagmode::Write);
-}
-
-MyProcessor::~MyProcessor() {
-  outBag.close();
-}
-
-class SampleSetDirectoryConverter {
-public:
-  SampleSetDirectoryConverter(const std::filesystem::path &path);
-  virtual ~SampleSetDirectoryConverter();
-
-  void process();
-
-  bool isRunning();
-  void stop();
-
-protected:
-  virtual void processInternal() = 0;
-
-  std::filesystem::path directoryPath;
-
-private:
-  bool running;
-};
-
-class ImageDirectoryConverter : public SampleSetDirectoryConverter {
-public:
-  ImageDirectoryConverter(SampleQueueProducer<sensor_msgs::Image> &&queue,
-                          const std::filesystem::path &path);
-
-  void processInternal() override;
-
-  SampleQueueProducer<sensor_msgs::Image> queue;
-};
-
-ImageDirectoryConverter::ImageDirectoryConverter(
-    SampleQueueProducer<sensor_msgs::Image> &&queue,
-    const std::filesystem::path &path)
-    : SampleSetDirectoryConverter(path), queue(std::move(queue)) {}
-
-struct ExtractedFileNameInfoImage {
-  int sceneId;
-  uint64_t stampUs;
-};
-
-static std::regex IMAGE_REGEX("^n(\\d+)-.*__(\\d+)\\.jpg");
-
-std::optional<ExtractedFileNameInfoImage>
-getInfoFromFilename(const std::string &fname) {
-  int sceneId;
-  uint64_t stampUs;
-
-  std::smatch m;
-  auto matched = std::regex_search(fname, m, IMAGE_REGEX);
-  if (matched) {
-    try {
-      sceneId = std::stoi(m[1]);
-      stampUs = std::stoull(m[2]);
-      return std::optional<ExtractedFileNameInfoImage>{{sceneId, stampUs}};
-    } catch (const std::exception &e) {
-      std::cout << "Unable to parse " << fname << std::endl;
-    }
-  }
-
-  return std::nullopt;
-}
-
-ros::Time stampUs2RosTime(uint64_t stampUs) {
-  ros::Time t;
-  t = t.fromNSec(stampUs * 1000);
-  return t;
-}
-
-void ImageDirectoryConverter::processInternal() {
-  std::vector<std::pair<fs::path, ExtractedFileNameInfoImage>> imageFiles;
-
-  for (const auto &entry : fs::directory_iterator(directoryPath)) {
-    if (!isRunning()) {
-      break;
-    }
-    if (entry.is_regular_file()) {
-      const auto &fname = entry.path().filename();
-      auto fileInfoOpt = getInfoFromFilename(fname);
-      if (fileInfoOpt.has_value()) {
-        auto fileInfo = fileInfoOpt.value();
-        // std::cout << "Processing image " << fileInfo.sceneId << "  " <<
-        // fileInfo.stampUs << std::endl;
-        imageFiles.emplace_back(entry.path(), fileInfo);
-      } else {
-        std::cout << "Skipping " << fname << std::endl;
-      }
-    }
-  }
-
-  std::sort(imageFiles.begin(), imageFiles.end(),
-            [](const auto &l, const auto &r) {
-              return l.second.stampUs < r.second.stampUs;
-            });
-
-  for (const auto &imageFile : imageFiles) {
-    if (!isRunning()) {
-      break;
-    }
-    cv::Mat image;
-    image = imread(imageFile.first.string().c_str(), cv::IMREAD_COLOR);
-    sensor_msgs::ImagePtr msg =
-        cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
-    msg->header.stamp = stampUs2RosTime(imageFile.second.stampUs);
-    sensor_msgs::Image msgCopy = *msg;
-
-    while (true) {
-      if (queue.canPush()) {
-        queue.push(std::move(msgCopy));
-        break;
-      } else if (!isRunning()) {
-        break;
-      } else {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-      }
-    }
-  }
-
-  queue.close();
-}
-
-SampleSetDirectoryConverter::SampleSetDirectoryConverter(
-    const std::filesystem::path &path)
-    : directoryPath(path), running(false) {}
-
-SampleSetDirectoryConverter::~SampleSetDirectoryConverter() {}
-
-void SampleSetDirectoryConverter::process() {
-  running = true;
-  processInternal();
-}
-
-bool SampleSetDirectoryConverter::isRunning() { return running; }
-
-void SampleSetDirectoryConverter::stop() { running = false; }
-
-std::string topicNameForCamera(const std::string dirName) {
-  std::string lowerDirName;
-  std::transform(dirName.begin(), dirName.end(), std::back_inserter(lowerDirName),
-                 ::tolower);
-  return std::string("/") + lowerDirName + "/image";
-}
 
 void NuScenes2Rosbag::convertDirectory(
     const std::filesystem::path &inDatasetPath,
@@ -302,10 +122,5 @@ void NuScenes2Rosbag::convertDirectory(
   }
 
   pool.join();
-  // std_msgs::String str;
-  // str.data = std::string("foo");
-
-  // std_msgs::Int32 i;
-  // i.data = 42;
 
 }

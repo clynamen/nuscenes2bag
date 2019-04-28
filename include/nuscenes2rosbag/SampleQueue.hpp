@@ -79,7 +79,6 @@ struct TopicInfo {
   TopicInfo(const std::string &topicName);
 };
 
-TopicInfo::TopicInfo(const std::string &topicName) : topicName(topicName) {}
 
 class SampleMsgProcessor {
 public:
