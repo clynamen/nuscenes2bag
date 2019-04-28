@@ -12,7 +12,9 @@ Currently work in progress
 
 - [x] Image support
 - [ ] Pointcloud support
+- [ ] Radar support
 - [ ] Split by scenes options
+- [X] Show progress
 - [ ] Better usability
 
 Create an Github issue for suggestion, bug and requests. 
