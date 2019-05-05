@@ -11,7 +11,7 @@ The original dataset is in file -> sample format. This tool takes each image or 
 Currently work in progress
 
 - [x] Image support
-- [ ] Pointcloud support
+- [x] Pointcloud support
 - [ ] Radar support
 - [ ] Split by scenes options
 - [X] Show progress
