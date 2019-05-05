@@ -17,12 +17,14 @@ public:
   SampleSetDirectoryConverter(const std::filesystem::path &path);
   virtual ~SampleSetDirectoryConverter();
 
+  void submit();
   void process();
 
   bool isRunning();
   void stop();
 
 protected:
+  virtual void submitInternal() = 0;
   virtual void processInternal() = 0;
 
   std::optional<ExtractedFileNameInfo>

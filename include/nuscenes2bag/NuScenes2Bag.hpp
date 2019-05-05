@@ -16,7 +16,10 @@ public:
   void convertDirectory(const std::filesystem::path &inDatasetPath,
                         const std::filesystem::path &outputRosbagPath);
 
-  std::optional<FileSystemSampleSet> extractSampleSetDescriptorInDirectory(
+  std::vector<SceneId> getSceneIdsInDirectory(
+      const std::filesystem::path &inDirectoryPath);
+
+  std::vector<FileSystemSampleSet> extractSampleSetsDescriptorInDirectory(
       const std::filesystem::path &inDirectoryPath);
 
   std::vector<FileSystemSampleSet>

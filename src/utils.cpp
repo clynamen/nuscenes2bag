@@ -1,5 +1,7 @@
 #include "nuscenes2bag/utils.hpp"
 
+#include <iostream>
+
 std::string toLower(const std::string_view& str) {
   std::string lowerStr;
   std::transform(str.begin(), str.end(), std::back_inserter(lowerStr),
@@ -9,12 +11,8 @@ std::string toLower(const std::string_view& str) {
 
 bool string_icontains(const std::string_view &string,
                       const std::string_view &sub) {
-  std::string lowerString;
-  std::string lowerSub;
-  std::transform(string.begin(), string.end(), std::back_inserter(lowerString),
-                 ::tolower);
-  std::transform(sub.begin(), sub.end(), std::back_inserter(lowerSub),
-                 ::tolower);
+  std::string lowerString = toLower(string);
+  std::string lowerSub = toLower(sub);
   return lowerString.find(lowerSub) != std::string::npos;
 }
 

@@ -10,6 +10,11 @@ SampleSetDirectoryConverter::SampleSetDirectoryConverter(
 
 SampleSetDirectoryConverter::~SampleSetDirectoryConverter() {}
 
+void SampleSetDirectoryConverter::submit() {
+  running = true;
+  submitInternal();
+}
+
 void SampleSetDirectoryConverter::process() {
   running = true;
   processInternal();
@@ -19,7 +24,7 @@ bool SampleSetDirectoryConverter::isRunning() { return running; }
 
 void SampleSetDirectoryConverter::stop() { running = false; }
 
-const std::regex SINGLE_SAMPLE_FILENAME_REGEX("^n(\\d+)-.*__(\\d+)\\.jpg");
+const std::regex SINGLE_SAMPLE_FILENAME_REGEX("^n(\\d+)-.*__(\\d+)\\..*");
 
 std::optional<ExtractedFileNameInfo> getInfoFromFilename(const std::string &fname) {
   int sceneId;

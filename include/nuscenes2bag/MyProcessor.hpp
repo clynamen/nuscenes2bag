@@ -3,25 +3,28 @@
 #include "nuscenes2bag/SampleQueue.hpp"
 #include "nuscenes2bag/SampleSetWorker.hpp"
 
+
 #include "rosbag/bag.h"
+
+struct BagDescriptor {
+  SceneId sceneId;
+};
 
 class MyProcessor : public SampleMsgProcessor {
 public:
   MyProcessor(const std::string& bagName);
 
-  virtual void process(const TopicInfo &topicInfo,
-                       SampleQueueConsumer<sensor_msgs::Image> &queueConsumer) {
-    std::optional<sensor_msgs::Image> imageOpt = queueConsumer.get();
+  void process(const TopicInfo &topicInfo,
+                       SampleQueueConsumer<sensor_msgs::Image> &queueConsumer) override; 
 
-    if(imageOpt.has_value()) {
-      sensor_msgs::Image image = imageOpt.value();
+  void process(const TopicInfo &topicInfo,
+                       SampleQueueConsumer<sensor_msgs::PointCloud2> &queueConsumer) override; 
 
-      //std::cout << "writing " << topicInfo.topicName << " at " << image.header.stamp << std::endl;
-      outBag.write(topicInfo.topicName, image.header.stamp, image);
-    }
-
-  };
+  rosbag::Bag* getBagForTopicInfo(const TopicInfo& topicInfo);
 
   virtual ~MyProcessor();
-  rosbag::Bag outBag;
+
+  std::vector<std::pair<BagDescriptor, std::unique_ptr<rosbag::Bag>>> bags;
+
+  std::string templateBagName;
 };

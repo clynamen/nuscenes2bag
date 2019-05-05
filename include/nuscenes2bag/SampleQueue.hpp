@@ -1,14 +1,21 @@
 #pragma once
 
+#include "nuscenes2bag/SampleSetDescriptor.hpp"
 #include <boost/lockfree/spsc_queue.hpp>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <sensor_msgs/Image.h>
+#include "sensor_msgs/PointCloud2.h"
 #include <string>
-#include <functional>
 #include <tuple>
 
 constexpr size_t DEFAULT_QUEUE_SIZE = 20;
+
+struct TopicInfo {
+  SceneId sceneId;
+  std::string topicName;
+};
 
 template <typename T> using queue_impl = boost::lockfree::spsc_queue<T>;
 
@@ -24,7 +31,7 @@ public:
 
 private:
   queue_impl<T> &queue;
-  bool& closed;
+  bool &closed;
 };
 
 template <typename T> class SampleQueueConsumer {
@@ -32,8 +39,7 @@ template <typename T> class SampleQueueConsumer {
 public:
   SampleQueueConsumer()
       : queue(std::make_unique<queue_impl<T>>(DEFAULT_QUEUE_SIZE)),
-        closed(std::make_unique<bool>(false))
-      {};
+        closed(std::make_unique<bool>(false)){};
 
   SampleQueueConsumer(const SampleQueueConsumer &r) = delete;
   SampleQueueConsumer(SampleQueueConsumer &&r)
@@ -44,20 +50,18 @@ public:
   std::optional<T> get() {
     if (size()) {
       T value;
-       queue->pop(value);
+      queue->pop(value);
       return std::optional<T>(value);
     } else {
       return std::nullopt;
     }
   }
 
-  bool isClosed() const { 
-      return *closed; 
-  };
+  bool isClosed() const { return *closed; };
 
-  size_t size() const { 
-      // std::cout  << "Size " << (int) queue->read_available() << std::endl;
-      return queue->read_available(); 
+  size_t size() const {
+    // std::cout  << "Size " << (int) queue->read_available() << std::endl;
+    return queue->read_available();
   }
 
   std::unique_ptr<queue_impl<T>> queue;
@@ -73,18 +77,15 @@ public:
   }
 };
 
-struct TopicInfo {
-  std::string topicName;
-
-  TopicInfo(const std::string &topicName);
-};
-
-
 class SampleMsgProcessor {
 public:
   virtual void
   process(const TopicInfo &topicInfo,
           SampleQueueConsumer<sensor_msgs::Image> &queueConsumer) = 0;
+
+  virtual void
+  process(const TopicInfo &topicInfo,
+          SampleQueueConsumer<sensor_msgs::PointCloud2> &queueConsumer) = 0;
 
   virtual ~SampleMsgProcessor() = default;
 };
@@ -96,8 +97,7 @@ public:
   TypeErasedQueue(T &obj)
       : object(std::make_unique<TypeErasedQueueModel<T>>(std::move(obj))) {}
 
-  void process(const TopicInfo &topicInfo,
-               SampleMsgProcessor &processor) {
+  void process(const TopicInfo &topicInfo, SampleMsgProcessor &processor) {
     return object->process(topicInfo, processor);
   }
 

@@ -6,11 +6,13 @@ add_compile_options(-std=c++2a)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED rosbag sensor_msgs cv_bridge)
+find_package(catkin REQUIRED rosbag sensor_msgs 
+cv_bridge   pcl_conversions  pcl_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-find_package(OpenCV REQUIRED)
+find_package(OpenCV REQUIRED core)
+#find_package(PCL REQUIRED COMPONENTS io)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -133,6 +135,7 @@ include_directories(
 
 set(SRCS
     src/ImageDirectoryConverter.cpp
+    src/LidarDirectoryConverter.cpp
     src/NuScenes2Bag.cpp
     src/SampleSetDescriptor.cpp
     src/SampleSetDirectoryConverter.cpp

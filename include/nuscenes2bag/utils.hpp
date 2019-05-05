@@ -1,3 +1,5 @@
+#pragma once
+
 #include "nuscenes2bag/SampleSetDescriptor.hpp"
 
 #include <string>
@@ -16,3 +18,9 @@ std::string topicNameForSampleSetType(const std::string dirName,
 std::string topicNameDefault(const std::string& dirName);
 
 std::string topicNameForCamera(const std::string& dirName);
+
+template <class T> T uniq(T t) {
+    sort(t.begin(), t.end());
+    t.erase(unique(t.begin(), t.end()), t.end());
+    return t;
+}

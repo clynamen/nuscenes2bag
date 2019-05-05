@@ -15,3 +15,20 @@
 //     directoryPath(directoryPath) {
 
 // }
+
+template <> std::string to_debug_string(const SampleSetDescriptor& v) {
+    std::ostringstream os;
+    os << "{" << "sceneId: " << v.sceneId
+      << ", directoryName: " << v.directoryName 
+    //   << ", setType: " << setType 
+    << "}";
+    return os.str(); 
+}
+
+
+template <> std::string to_debug_string(const FileSystemSampleSet& v) {
+    std::ostringstream os;
+    os << "{" << "descriptor: " << to_debug_string(v.descriptor)
+      << ", directoryPath: " << v.directoryPath << "}";
+    return os.str(); 
+}

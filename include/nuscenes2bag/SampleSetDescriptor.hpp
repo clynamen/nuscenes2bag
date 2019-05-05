@@ -1,6 +1,13 @@
 #pragma once
 
 #include <filesystem>
+#include <sstream>
+#include <string>
+#include <iostream>
+
+
+
+template <typename T> std::string to_debug_string(const T& t);
 
 enum class SampleSetType {
     CAMERA,
@@ -8,21 +15,19 @@ enum class SampleSetType {
     LIDAR
 };
 
-struct SampleSetDescriptor {
-    // SampleSetDescriptor() = default;
-    // SampleSetDescriptor(const SampleSetDescriptor& o) = default;
-    // SampleSetDescriptor(const std::string_view& directoryName, SampleSetType setType);
+typedef uint32_t SceneId;
 
+struct SampleSetDescriptor {
+    SceneId sceneId;
     std::string directoryName;
     SampleSetType setType;
 };
 
-struct FileSystemSampleSet {
-    // FileSystemSampleSet() = default;
-    // FileSystemSampleSet(const FileSystemSampleSet& o) = default;
-    // FileSystemSampleSet(const SampleSetDescriptor& descriptor, 
-    //     const std::filesystem::path& directoryPath);
+template <> std::string to_debug_string(const SampleSetDescriptor& v);
 
+struct FileSystemSampleSet {
     SampleSetDescriptor descriptor;
     std::filesystem::path directoryPath;
 };
+
+template <> std::string to_debug_string(const FileSystemSampleSet& v);
