@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nuscenes2bag/SampleSetDescriptor.hpp"
+#include "nuscenes2bag/RadarObjects.h"
 #include <boost/lockfree/spsc_queue.hpp>
 #include <functional>
 #include <memory>
@@ -86,6 +87,10 @@ public:
   virtual void
   process(const TopicInfo &topicInfo,
           SampleQueueConsumer<sensor_msgs::PointCloud2> &queueConsumer) = 0;
+
+  virtual void
+  process(const TopicInfo &topicInfo,
+          SampleQueueConsumer<nuscenes2bag::RadarObjects> &queueConsumer) = 0;
 
   virtual ~SampleMsgProcessor() = default;
 };

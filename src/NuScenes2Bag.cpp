@@ -4,6 +4,7 @@
 #include "nuscenes2bag/MyProcessor.hpp"
 #include "nuscenes2bag/SampleQueue.hpp"
 #include "nuscenes2bag/utils.hpp"
+#include "nuscenes2bag/RadarObjects.h"
 
 #include <boost/asio.hpp>
 
@@ -42,9 +43,9 @@ NuScenes2Bag::extractSampleSetsDescriptorInDirectory(
     const SampleSetType sampleType;
   };
 
-  static std::array<InfoPreset, 2> presets{
+  static std::array<InfoPreset, 3> presets{
       "CAM", SampleSetType::CAMERA, "LIDAR", SampleSetType::LIDAR,
-      // "RADAR", SampleSetType::RADAR,
+      "RADAR", SampleSetType::RADAR,
   };
 
   std::vector<FileSystemSampleSet> sampleSets;
@@ -94,8 +95,9 @@ std::vector<FileSystemSampleSet> NuScenes2Bag::filterChosenSampleSets(
   std::vector<FileSystemSampleSet> filteredSets;
   std::copy_if(sampleSets.begin(), sampleSets.end(),
                std::back_inserter(filteredSets), [](auto &fileSystemSampleSet) {
-                 return fileSystemSampleSet.descriptor.setType !=
+                 return fileSystemSampleSet.descriptor.setType ==
                         SampleSetType::RADAR;
+                // return true;
                });
 
   return filteredSets;
@@ -159,6 +161,9 @@ void NuScenes2Bag::processSampleSets(
                                           sampleSetConverters, fileProgress);
     } else if (sampleSet.descriptor.setType == SampleSetType::LIDAR) {
       addNewConverter<sensor_msgs::PointCloud2>(
+          sampleSet, typeErasedQueueList, sampleSetConverters, fileProgress);
+    } else if (sampleSet.descriptor.setType == SampleSetType::RADAR) {
+      addNewConverter<nuscenes2bag::RadarObjects>(
           sampleSet, typeErasedQueueList, sampleSetConverters, fileProgress);
     } else {
       throw std::runtime_error("Not supported SampleSetType");

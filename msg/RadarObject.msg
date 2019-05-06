@@ -1,0 +1,16 @@
+geometry_msgs/Vector3 pose
+uint8 dyn_prop
+uint16 id
+float32 rcs
+float32 vx
+float32 vy
+float32 vx_comp
+float32 vy_comp
+uint8 is_quality_valid
+uint8 ambig_state
+uint8 x_rms
+uint8 y_rms
+uint8 invalid_state
+uint8 pdh0
+uint8 vx_rms
+uint8 vy_rms

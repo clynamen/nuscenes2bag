@@ -2,6 +2,7 @@
 
 #include "nuscenes2bag/SampleQueue.hpp"
 #include "nuscenes2bag/SampleSetWorker.hpp"
+#include "nuscenes2bag/RadarObjects.h"
 
 
 #include "rosbag/bag.h"
@@ -19,6 +20,9 @@ public:
 
   void process(const TopicInfo &topicInfo,
                        SampleQueueConsumer<sensor_msgs::PointCloud2> &queueConsumer) override; 
+
+  void process(const TopicInfo &topicInfo,
+                       SampleQueueConsumer<nuscenes2bag::RadarObjects> &queueConsumer) override; 
 
   rosbag::Bag* getBagForTopicInfo(const TopicInfo& topicInfo);
 

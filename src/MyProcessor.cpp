@@ -58,3 +58,16 @@ void MyProcessor::process(
     outBag->write(topicInfo.topicName, image.header.stamp, image);
   }
 };
+
+void MyProcessor::process(
+    const TopicInfo &topicInfo,
+    SampleQueueConsumer<nuscenes2bag::RadarObjects> &queueConsumer) {
+  auto radarObjectsOpt = queueConsumer.get();
+
+  if (radarObjectsOpt.has_value()) {
+    auto radarObjects = radarObjectsOpt.value();
+
+    auto outBag = getBagForTopicInfo(topicInfo);
+    outBag->write(topicInfo.topicName, radarObjects.header.stamp, radarObjects);
+  }
+};
