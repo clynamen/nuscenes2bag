@@ -19,21 +19,21 @@ struct PclRadarObject {
   float z;
 //   PCL_ADD_POINT4D
 
-  uint8_t dyn_prop;
-  uint16_t id;
+  int8_t dyn_prop;
+  int16_t id;
   float rcs;
   float vx;
   float vy;
   float vx_comp;
   float vy_comp;
-  uint8_t is_quality_valid;
-  uint8_t ambig_state;
-  uint8_t x_rms;
-  uint8_t y_rms;
-  uint8_t invalid_state;
-  uint8_t pdh0;
-  uint8_t vx_rms;
-  uint8_t vy_rms;
+  int8_t is_quality_valid;
+  int8_t ambig_state;
+  int8_t x_rms;
+  int8_t y_rms;
+  int8_t invalid_state;
+  int8_t pdh0;
+  int8_t vx_rms;
+  int8_t vy_rms;
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 } EIGEN_ALIGN16;
 
@@ -42,19 +42,19 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(
     (float, x, x)
     (float, y, y)
     (float, z, z)
-    (uint8_t, dyn_prop, dyn_prop)
-    (uint16_t, id, id)
+    (int8_t, dyn_prop, dyn_prop)
+    (int16_t, id, id)
     (float, rcs, rcs)
     (float, vx, vx)
     (float, vy, vy)
     (float, vx_comp, vx_comp)
     (float, vy_comp, vy_comp)
-    (uint8_t, is_quality_valid, is_quality_valid)
-    (uint8_t, ambig_state, ambig_state)
-    (uint8_t, x_rms, x_rms)
-    (uint8_t, y_rms, y_rms)
-    (uint8_t, invalid_state, invalid_state)
-    (uint8_t, pdh0, pdh0)
-    (uint8_t, vx_rms, vx_rms)
-    (uint8_t, vy_rms, vy_rms)
+    (int8_t, is_quality_valid, is_quality_valid)
+    (int8_t, ambig_state, ambig_state)
+    (int8_t, x_rms, x_rms)
+    (int8_t, y_rms, y_rms)
+    (int8_t, invalid_state, invalid_state)
+    (int8_t, pdh0, pdh0)
+    (int8_t, vx_rms, vx_rms)
+    (int8_t, vy_rms, vy_rms)
     )
