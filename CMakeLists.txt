@@ -103,7 +103,9 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include
+ INCLUDE_DIRS 
+  include
+  thirdparty/json/
 #  LIBRARIES nuscenes2bag
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS opencv
@@ -117,6 +119,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
  include
+ thirdparty/json/
  ${catkin_INCLUDE_DIRS}
  ${OpenCV_INCLUDE_DIRS}
 )
@@ -144,6 +147,7 @@ set(SRCS
     src/SampleQueue.cpp
     src/MyProcessor.cpp
     src/FileProgress.cpp
+    src/MetaDataReader.cpp
     src/utils.cpp
 )
 

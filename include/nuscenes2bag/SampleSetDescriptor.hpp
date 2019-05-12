@@ -5,9 +5,7 @@
 #include <string>
 #include <iostream>
 
-
-
-template <typename T> std::string to_debug_string(const T& t);
+#include "nuscenes2bag/ToDebugString.hpp"
 
 enum class SampleSetType {
     CAMERA,

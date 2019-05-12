@@ -1,4 +1,5 @@
 #include "nuscenes2bag/NuScenes2Bag.hpp"
+#include "nuscenes2bag/MetaDataReader.hpp"
 #include <boost/program_options.hpp>
 
 using namespace boost::program_options;
@@ -7,6 +8,7 @@ int main(const int argc, const char *argv[]) {
   try {
     std::string sampleDir;
     std::string outputBagName;
+
 
     options_description desc{"Options"};
     desc.add_options()("help,h", "show help");
@@ -27,7 +29,10 @@ int main(const int argc, const char *argv[]) {
     } else {
       NuScenes2Bag converter{};
 
-      converter.convertDirectory(sampleDir, outputBagName);
+      MetaDataReader metaDataReader;
+      std::filesystem::path sampleDirPath(sampleDir); 
+      metaDataReader.loadFromDirectory(sampleDirPath / "v1.0-mini");
+      //converter.convertDirectory(sampleDir, outputBagName);
     }
   } catch (const error &ex) {
     std::cerr << ex.what() << '\n';
