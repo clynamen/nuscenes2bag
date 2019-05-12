@@ -148,6 +148,8 @@ set(SRCS
     src/MyProcessor.cpp
     src/FileProgress.cpp
     src/MetaDataReader.cpp
+    src/MetaData.cpp
+    src/SceneConverter.cpp
     src/utils.cpp
 )
 

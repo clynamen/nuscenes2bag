@@ -2,9 +2,11 @@
 #include "nuscenes2bag/ImageDirectoryConverter.hpp"
 #include "nuscenes2bag/LidarDirectoryConverter.hpp"
 #include "nuscenes2bag/MyProcessor.hpp"
-#include "nuscenes2bag/SampleQueue.hpp"
-#include "nuscenes2bag/utils.hpp"
 #include "nuscenes2bag/RadarObjects.h"
+#include "nuscenes2bag/RunEvery.hpp"
+#include "nuscenes2bag/SampleQueue.hpp"
+#include "nuscenes2bag/SceneConverter.hpp"
+#include "nuscenes2bag/utils.hpp"
 
 #include <boost/asio.hpp>
 
@@ -15,6 +17,7 @@
 #include <std_msgs/String.h>
 #include <thread>
 
+using namespace std;
 namespace fs = std::filesystem;
 
 NuScenes2Bag::NuScenes2Bag() {}
@@ -44,7 +47,7 @@ NuScenes2Bag::extractSampleSetsDescriptorInDirectory(
   };
 
   static std::array<InfoPreset, 3> presets{
-      "CAM", SampleSetType::CAMERA, "LIDAR", SampleSetType::LIDAR,
+      "CAM",   SampleSetType::CAMERA, "LIDAR", SampleSetType::LIDAR,
       "RADAR", SampleSetType::RADAR,
   };
 
@@ -97,32 +100,11 @@ std::vector<FileSystemSampleSet> NuScenes2Bag::filterChosenSampleSets(
                std::back_inserter(filteredSets), [](auto &fileSystemSampleSet) {
                  return fileSystemSampleSet.descriptor.setType ==
                         SampleSetType::RADAR;
-                // return true;
+                 // return true;
                });
 
   return filteredSets;
 }
-
-template <typename T> class RunEvery {
-public:
-  RunEvery(std::chrono::milliseconds periodMs, T &&lambda)
-      : periodMs(periodMs), lastExecutionTime(std::chrono::system_clock::now()),
-        lambda(lambda) {}
-
-  void update() {
-    auto now = std::chrono::system_clock::now();
-    auto dtMs = std::chrono::duration_cast<std::chrono::milliseconds>(
-        now - lastExecutionTime);
-    if (dtMs > periodMs) {
-      lambda();
-      lastExecutionTime = now;
-    }
-  }
-
-  std::chrono::time_point<std::chrono::system_clock> lastExecutionTime;
-  std::chrono::milliseconds periodMs;
-  T lambda;
-};
 
 template <typename T>
 void addNewConverter(
@@ -217,4 +199,44 @@ void NuScenes2Bag::convertDirectory(
   }
 
   processSampleSets(chosenSets, outputRosbagPath);
+}
+
+void NuScenes2Bag::convertDirectory2(
+    const std::filesystem::path &inDatasetPath,
+    const std::filesystem::path &outputRosbagPath) {
+
+  MetaDataReader metaDataReader;
+  cout << "Loading metadata..." << endl;
+  metaDataReader.loadFromDirectory(inDatasetPath / "v1.0-mini");
+
+  boost::asio::thread_pool pool;
+  std::vector<std::unique_ptr<SceneConverter>> sceneConverters;
+  FileProgress fileProgress;
+
+  fs::create_directories(outputRosbagPath);
+  for (const auto &sceneToken : metaDataReader.getAllSceneTokens()) {
+    std::unique_ptr<SceneConverter> sceneConverter =
+        std::make_unique<SceneConverter>(metaDataReader);
+    sceneConverter->submit(sceneToken, fileProgress);
+    SceneConverter* sceneConverterPtr = sceneConverter.get();
+    sceneConverters.push_back(std::move(sceneConverter));
+    boost::asio::defer(pool, [&, sceneConverterPtr]() {
+      sceneConverterPtr->run(inDatasetPath, outputRosbagPath, fileProgress);
+    });
+    // std::cout << to_debug_string(set) << std::endl;
+  }
+
+  RunEvery showProgress(std::chrono::milliseconds(1000), [&fileProgress]() {
+    std::cout << "Progress: " << fileProgress.getProgressPercentage() << " ["
+              << fileProgress.processedFiles << "/"
+              << fileProgress.toProcessFiles << "]" << std::endl;
+  });
+
+  // TODO: replace check with futures
+  while(fileProgress.processedFiles != fileProgress.toProcessFiles) {
+      showProgress.update();
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+
+  pool.join();
 }

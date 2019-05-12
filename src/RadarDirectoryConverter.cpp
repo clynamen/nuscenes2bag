@@ -1,16 +1,12 @@
 #include "nuscenes2bag/RadarDirectoryConverter.hpp"
-#include "nuscenes2bag/PclRadarObject.hpp"
 
 using namespace sensor_msgs;
 using namespace std;
 using namespace nuscenes2bag;
 
-template <>
-std::optional<RadarObjects> processSingleFileFun(
-    const std::pair<std::filesystem::path, ExtractedFileNameInfo> &fileInfo) {
-
+std::optional<RadarObjects> readRadarFile(const std::filesystem::path& filePath) {
+  const auto fileName = filePath.string();
   pcl::PointCloud<PclRadarObject>::Ptr cloud(new pcl::PointCloud<PclRadarObject>);
-  const auto fileName = fileInfo.first.string();
 
   if (pcl::io::loadPCDFile<PclRadarObject>(fileName, *cloud) ==
       -1) //* load the file
@@ -23,7 +19,6 @@ std::optional<RadarObjects> processSingleFileFun(
   }
 
   RadarObjects radarObjects;
-  radarObjects.header.stamp = stampUs2RosTime(fileInfo.second.stampUs);
 
   for(const auto& pclRadarObject: *cloud) {
       RadarObject obj;
@@ -48,6 +43,18 @@ std::optional<RadarObjects> processSingleFileFun(
 
   }
 
+  return std::optional(radarObjects);
+}
+
+template <>
+std::optional<RadarObjects> processSingleFileFun(
+    const std::pair<std::filesystem::path, ExtractedFileNameInfo> &fileInfo) {
+
+  auto radarObjects = readRadarFile(fileInfo.first);
+
+  if(radarObjects.has_value()) {
+    radarObjects->header.stamp = stampUs2RosTime(fileInfo.second.stampUs);
+  }
 
   return radarObjects;
 }

@@ -29,10 +29,8 @@ int main(const int argc, const char *argv[]) {
     } else {
       NuScenes2Bag converter{};
 
-      MetaDataReader metaDataReader;
       std::filesystem::path sampleDirPath(sampleDir); 
-      metaDataReader.loadFromDirectory(sampleDirPath / "v1.0-mini");
-      //converter.convertDirectory(sampleDir, outputBagName);
+      converter.convertDirectory2(sampleDir, outputBagName);
     }
   } catch (const error &ex) {
     std::cerr << ex.what() << '\n';

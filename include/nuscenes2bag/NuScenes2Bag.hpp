@@ -16,6 +16,9 @@ public:
   void convertDirectory(const std::filesystem::path &inDatasetPath,
                         const std::filesystem::path &outputRosbagPath);
 
+  void convertDirectory2(const std::filesystem::path &inDatasetPath,
+                        const std::filesystem::path &outputRosbagPath);
+
   std::vector<SceneId> getSceneIdsInDirectory(
       const std::filesystem::path &inDirectoryPath);
 

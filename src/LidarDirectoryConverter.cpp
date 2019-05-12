@@ -3,12 +3,9 @@
 using namespace sensor_msgs;
 using namespace std;
 
-template <>
-std::optional<PointCloud2> processSingleFileFun(
-    const std::pair<std::filesystem::path, ExtractedFileNameInfo> &fileInfo) {
+std::optional<sensor_msgs::PointCloud2> readLidarFile(std::filesystem::path filePath) {
 
     PointCloud2 cloud;
-    auto pathStr = fileInfo.first.string();
 
     try{
         cloud.header.frame_id = std::string("lidar");
@@ -19,7 +16,7 @@ std::optional<PointCloud2> processSingleFileFun(
 
         std::vector<float> fileValues;
         // fileValues.reserve(32776*4);
-        std::ifstream fin(pathStr, std::ios::binary);
+        std::ifstream fin(filePath.string(), std::ios::binary);
         float f;
         uint8_t skipCounter = 0;
         uint32_t floatRead = 0;
@@ -73,8 +70,6 @@ std::optional<PointCloud2> processSingleFileFun(
         field.name = std::string("intensity");
         cloud.fields.push_back(field);
 
-
-        cloud.header.stamp = stampUs2RosTime(fileInfo.second.stampUs);
         cloud.data = data;
 
     } catch (const std::exception& e) {
@@ -83,6 +78,19 @@ std::optional<PointCloud2> processSingleFileFun(
     }
 
     return std::optional(cloud);
+}
+
+template <>
+std::optional<PointCloud2> processSingleFileFun(
+    const std::pair<std::filesystem::path, ExtractedFileNameInfo> &fileInfo) {
+
+    auto pathStr = fileInfo.first.string();
+    auto cloud = readLidarFile(fileInfo.first);
+    if(cloud.has_value()) {
+        cloud->header.stamp = stampUs2RosTime(fileInfo.second.stampUs);
+    }
+
+    return cloud;
 }
 
 template <>

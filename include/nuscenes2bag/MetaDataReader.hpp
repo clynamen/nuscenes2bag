@@ -1,43 +1,14 @@
 #include <iostream>
 #include <filesystem>
-#include <string>
 #include <map>
-#include "nuscenes2bag/ToDebugString.hpp"
+
 #include <nlohmann/json.hpp>
 
-typedef std::string Token;
-typedef uint64_t TimeStamp;
-typedef uint32_t SceneId;
+#include "nuscenes2bag/ToDebugString.hpp"
+#include "nuscenes2bag/MetaData.hpp"
+#include "nuscenes2bag/MetaDataProvider.hpp"
 
-struct SceneInfo {
-    Token token; 
-    uint32_t sampleNumber;
-    SceneId sceneId;
-    std::string name;
-    std::string description;
-    Token firstSampleToken; 
-};
-
-struct SampleInfo {
-    Token token;
-    TimeStamp timeStamp;
-};
-
-struct SampleDataInfo {
-    Token token;
-    TimeStamp timeStamp;
-    Token egoPoseToken;
-    Token calibratedSensorToken;
-    std::string fileFormat;
-    bool isKeyFrame;
-    std::string fileName;
-};
-
-
-
-template <> std::string to_debug_string(const SceneInfo& t);
-
-class MetaDataReader {
+class MetaDataReader : public MetaDataProvider {
     public:
         void loadFromDirectory(const std::filesystem::path& directoryPath);
 
@@ -45,10 +16,16 @@ class MetaDataReader {
         static std::vector<SceneInfo> loadScenesFromFile(const std::filesystem::path& filePath);
         static std::map<Token, std::vector<SampleInfo>> loadSampleInfos(const std::filesystem::path& filePath);
         static std::map<Token, std::vector<SampleDataInfo>> loadSampleDataInfos(const std::filesystem::path& filePath);
+        static std::map<Token, std::vector<EgoPoseInfo>> loadEgoPoseInfos(const std::filesystem::path& filePath);
 
+        std::vector<Token> getAllSceneTokens() const override;
+        std::optional<SceneInfo> getSceneInfo(const Token& sceneToken) const override;
+        std::vector<SampleDataInfo> getSceneSampleData(const Token& sceneToken) const override;
+        // std::vector<EgoPoseInfo> getEgoPoseInfo(const Token& sceneToken) const override;
 
     private:
         std::vector<SceneInfo> scenes;
         std::map<Token, std::vector<SampleInfo>> scene2Samples;
         std::map<Token, std::vector<SampleDataInfo>> sample2SampleData;
+        bool loadFromDirectoryCalled = false;
 };
