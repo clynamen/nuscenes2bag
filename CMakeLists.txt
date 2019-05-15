@@ -142,10 +142,6 @@ set(SRCS
     src/LidarDirectoryConverter.cpp
     src/RadarDirectoryConverter.cpp
     src/NuScenes2Bag.cpp
-    src/SampleSetDescriptor.cpp
-    src/SampleSetDirectoryConverter.cpp
-    src/SampleQueue.cpp
-    src/MyProcessor.cpp
     src/FileProgress.cpp
     src/MetaDataReader.cpp
     src/MetaData.cpp

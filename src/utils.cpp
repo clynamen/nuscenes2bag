@@ -22,10 +22,10 @@ ros::Time stampUs2RosTime(uint64_t stampUs) {
   return t;
 }
 
-std::string topicNameForSampleSetType(const std::string dirName, 
-    const SampleSetType sampleSetType) {
-  switch(sampleSetType) {
-    case SampleSetType::CAMERA:          
+std::string topicNameForSampleType(const std::string dirName, 
+    const SampleType SampleType) {
+  switch(SampleType) {
+    case SampleType::CAMERA:          
         return topicNameForCamera(dirName);
     // default:
     //     //pass

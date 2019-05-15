@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nuscenes2bag/SampleSetDescriptor.hpp"
+#include "nuscenes2bag/DatasetTypes.hpp"
 
 #include "ros/ros.h"
 #include <string>
@@ -12,8 +12,8 @@ bool string_icontains(const std::string_view &string,
 
 ros::Time stampUs2RosTime(uint64_t stampUs);
 
-std::string topicNameForSampleSetType(const std::string dirName,
-                                      const SampleSetType sampleSetType);
+std::string topicNameForSampleType(const std::string dirName,
+                                      const SampleType SampleType);
 
 std::string topicNameDefault(const std::string &dirName);
 

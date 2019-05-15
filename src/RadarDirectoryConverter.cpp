@@ -1,5 +1,7 @@
 #include "nuscenes2bag/RadarDirectoryConverter.hpp"
 
+#include <pcl_ros/point_cloud.h>
+
 using namespace sensor_msgs;
 using namespace std;
 using namespace nuscenes2bag;
@@ -45,20 +47,3 @@ std::optional<RadarObjects> readRadarFile(const std::filesystem::path& filePath)
 
   return std::optional(radarObjects);
 }
-
-template <>
-std::optional<RadarObjects> processSingleFileFun(
-    const std::pair<std::filesystem::path, ExtractedFileNameInfo> &fileInfo) {
-
-  auto radarObjects = readRadarFile(fileInfo.first);
-
-  if(radarObjects.has_value()) {
-    radarObjects->header.stamp = stampUs2RosTime(fileInfo.second.stampUs);
-  }
-
-  return radarObjects;
-}
-
-template <>
-class MsgDirectoryConverter<RadarObjects>
-    : public SampleSetDirectoryConverter {};

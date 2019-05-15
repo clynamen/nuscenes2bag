@@ -30,7 +30,7 @@ int main(const int argc, const char *argv[]) {
       NuScenes2Bag converter{};
 
       std::filesystem::path sampleDirPath(sampleDir); 
-      converter.convertDirectory2(sampleDir, outputBagName);
+      converter.convertDirectory(sampleDir, outputBagName);
     }
   } catch (const error &ex) {
     std::cerr << ex.what() << '\n';

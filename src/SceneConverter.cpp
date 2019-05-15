@@ -1,5 +1,5 @@
 #include "nuscenes2bag/SceneConverter.hpp"
-#include "nuscenes2bag/SampleSetDescriptor.hpp"
+#include "nuscenes2bag/DatasetTypes.hpp"
 #include "nuscenes2bag/utils.hpp"
 
 #include "nuscenes2bag/ImageDirectoryConverter.hpp"
@@ -9,20 +9,21 @@
 #include <array>
 #include <iostream>
 #include <string>
+#include <regex>
 
 using namespace std;
 
 SceneConverter::SceneConverter(const MetaDataProvider &metaDataProvider)
     : metaDataProvider(metaDataProvider) {}
 
-std::optional<SampleSetType> getSampleType(const std::string_view filename) {
-  std::array<std::pair<const char *, SampleSetType>, 3> pairs = {
-      {{"CAM", SampleSetType::CAMERA},
-       {"RADAR", SampleSetType::RADAR},
-       {"LIDAR", SampleSetType::LIDAR}}};
-  for (const auto &[str, sampleSetType] : pairs) {
+std::optional<SampleType> getSampleType(const std::string_view filename) {
+  std::array<std::pair<const char *, SampleType>, 3> pairs = {
+      {{"CAM", SampleType::CAMERA},
+       {"RADAR", SampleType::RADAR},
+       {"LIDAR", SampleType::LIDAR}}};
+  for (const auto &[str, SampleType] : pairs) {
     if (filename.find(str) != string::npos) {
-      return std::optional(sampleSetType);
+      return std::optional(SampleType);
     }
   }
   cout << "Unknown file " << filename << endl;
@@ -40,16 +41,6 @@ template<typename T> void writeMsg(
   }
 }
 
-// void convertImageFile(const std::filesystem::path &file,
-//                       const std::string_view topicName,
-//                       const TimeStamp timeStamp, rosbag::Bag &outBag) {
-//   auto msgOpt = readImageFile(file);
-//   if (msgOpt.has_value()) {
-//     auto &msg = msgOpt.value();
-//     msg.header.stamp = stampUs2RosTime(timeStamp);
-//     outBag.write(std::string(topicName).c_str(), msg.header.stamp, msg);
-//   }
-// }
 static const std::regex TOPIC_REGEX = std::regex(".*__([A-Z_]+)__.*");
 
 void SceneConverter::submit(const Token& sceneToken, FileProgress& fileProgress) {
@@ -96,11 +87,11 @@ void SceneConverter::run(const std::filesystem::path &inPath,
     std::string topicName = toLower(m.str(1));
     assert(!topicName.empty());
 
-    if (sampleType == SampleSetType::CAMERA) {
+    if (sampleType == SampleType::CAMERA) {
       writeMsg(topicName, sampleData.timeStamp, outBag, readImageFile(sampleFilePath));
-    } else if (sampleType == SampleSetType::LIDAR) {
+    } else if (sampleType == SampleType::LIDAR) {
       writeMsg(topicName, sampleData.timeStamp, outBag, readLidarFile(sampleFilePath));
-    } else if (sampleType == SampleSetType::RADAR) {
+    } else if (sampleType == SampleType::RADAR) {
       writeMsg(topicName, sampleData.timeStamp, outBag, readRadarFile(sampleFilePath));
     } else {
       cout << "Unknown sample type" << endl;

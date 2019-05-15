@@ -32,20 +32,6 @@ struct SampleDataInfo {
     std::string fileName;
 };
 
-// "token": "5d238c9840c64e6188bba20a2917e48e",
-// "timestamp": 1532402945801309,
-// "rotation": [
-// 0.9858272960625895,
-// -0.02308945425603873,
-// 0.009966776080608072,
-// -0.16586766657380866
-// ],
-// "translation": [
-// 418.3997186638232,
-// 1105.1880827769266,
-// 0.0
-// ]
-
 struct EgoPoseInfo {
     Token token;
     TimeStamp timeStamp;

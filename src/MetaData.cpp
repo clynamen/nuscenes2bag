@@ -2,14 +2,13 @@
 #include <sstream>
 
 
-template <> std::string to_debug_string(const SceneInfo& s) {
+template <> std::string to_debug_string(const SceneInfo& o) {
     std::ostringstream os;
-    os << "{" << "token: " << s.token
-      << ", sampleNumber: " << s.sampleNumber
-      << ", sceneId: " << s.sceneId
-      << ", name: " << s.name
-      << ", description: " << s.description
-    << "}";
+    os << SHOW_FIRST_MEMBER(token)  
+       << SHOW_MEMBER(sampleNumber)
+       << SHOW_MEMBER(sceneId)
+       << SHOW_MEMBER(name)
+       << SHOW_LAST_MEMBER(description);
     return os.str(); 
 }
 

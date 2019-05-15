@@ -15,7 +15,6 @@ std::optional<sensor_msgs::PointCloud2> readLidarFile(std::filesystem::path file
         cloud.height = 1;
 
         std::vector<float> fileValues;
-        // fileValues.reserve(32776*4);
         std::ifstream fin(filePath.string(), std::ios::binary);
         float f;
         uint8_t skipCounter = 0;
@@ -79,19 +78,3 @@ std::optional<sensor_msgs::PointCloud2> readLidarFile(std::filesystem::path file
 
     return std::optional(cloud);
 }
-
-template <>
-std::optional<PointCloud2> processSingleFileFun(
-    const std::pair<std::filesystem::path, ExtractedFileNameInfo> &fileInfo) {
-
-    auto pathStr = fileInfo.first.string();
-    auto cloud = readLidarFile(fileInfo.first);
-    if(cloud.has_value()) {
-        cloud->header.stamp = stampUs2RosTime(fileInfo.second.stampUs);
-    }
-
-    return cloud;
-}
-
-template <>
-class MsgDirectoryConverter<sensor_msgs::PointCloud2> : public SampleSetDirectoryConverter {};
