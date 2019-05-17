@@ -8,7 +8,7 @@ add_compile_options(-std=c++2a)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED rosbag sensor_msgs 
 cv_bridge   pcl_conversions  pcl_msgs message_generation
-geometry_msgs std_msgs)
+geometry_msgs std_msgs nav_msgs tf)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -71,6 +71,8 @@ generate_messages(
   DEPENDENCIES
   std_msgs  
   geometry_msgs
+  tf
+  nav_msgs
 )
 
 ################################################
@@ -138,6 +140,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 
 set(SRCS
+    src/EgoPoseConverter.cpp
     src/ImageDirectoryConverter.cpp
     src/LidarDirectoryConverter.cpp
     src/RadarDirectoryConverter.cpp

@@ -14,7 +14,8 @@ public:
   NuScenes2Bag();
 
   void convertDirectory(const std::filesystem::path &inDatasetPath,
-                        const std::filesystem::path &outputRosbagPath);
+                        const std::filesystem::path &outputRosbagPath, 
+                        int32_t threadNumber);
 
 private:
   std::string inDatasetPathString;

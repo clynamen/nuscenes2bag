@@ -8,6 +8,7 @@ int main(const int argc, const char *argv[]) {
   try {
     std::string sampleDir;
     std::string outputBagName;
+    int32_t threadNumber;
 
 
     options_description desc{"Options"};
@@ -16,7 +17,8 @@ int main(const int argc, const char *argv[]) {
     options_description inputDesc{"input"};
     inputDesc.add_options()("sample_dir,s", value<std::string>(&sampleDir),
                             "input directory")(
-        "out,o", value<std::string>(&outputBagName), "output bag name");
+        "out,o", value<std::string>(&outputBagName), "output bag name")
+        ("jobs,j", value<int32_t>(&threadNumber), "number of jobs (thread number)");
     variables_map vm;
 
     desc.add(inputDesc);
@@ -30,7 +32,7 @@ int main(const int argc, const char *argv[]) {
       NuScenes2Bag converter{};
 
       std::filesystem::path sampleDirPath(sampleDir); 
-      converter.convertDirectory(sampleDir, outputBagName);
+      converter.convertDirectory(sampleDir, outputBagName, threadNumber);
     }
   } catch (const error &ex) {
     std::cerr << ex.what() << '\n';

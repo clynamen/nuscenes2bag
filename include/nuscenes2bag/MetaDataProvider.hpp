@@ -1,13 +1,17 @@
 #include "nuscenes2bag/MetaData.hpp"
 
-#include <vector>
 #include <optional>
+#include <vector>
 
 class MetaDataProvider {
-    public:
-    virtual ~MetaDataProvider() = default;
+public:
+  virtual ~MetaDataProvider() = default;
 
-    virtual std::vector<Token> getAllSceneTokens() const = 0;
-    virtual std::optional<SceneInfo> getSceneInfo(const Token& sceneToken) const = 0;
-    virtual std::vector<SampleDataInfo> getSceneSampleData(const Token& sceneSampleData) const = 0;
+  virtual std::vector<Token> getAllSceneTokens() const = 0;
+  virtual std::optional<SceneInfo>
+  getSceneInfo(const Token &sceneToken) const = 0;
+  virtual std::vector<SampleDataInfo>
+  getSceneSampleData(const Token &sceneSampleData) const = 0;
+  virtual std::vector<EgoPoseInfo>
+  getEgoPoseInfo(const Token &sceneToken) const = 0;
 };

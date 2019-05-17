@@ -22,13 +22,18 @@ NuScenes2Bag::NuScenes2Bag() {}
 
 void NuScenes2Bag::convertDirectory(
     const std::filesystem::path &inDatasetPath,
-    const std::filesystem::path &outputRosbagPath) {
+    const std::filesystem::path &outputRosbagPath, 
+    int threadNumber) {
+  if(threadNumber < 1) {
+    std::cout << "Forcing at least one job number (-j1)" << std::endl;
+    threadNumber = 1;
+  }
 
   MetaDataReader metaDataReader;
   cout << "Loading metadata..." << endl;
   metaDataReader.loadFromDirectory(inDatasetPath / "v1.0-mini");
 
-  boost::asio::thread_pool pool;
+  boost::asio::thread_pool pool(threadNumber);
   std::vector<std::unique_ptr<SceneConverter>> sceneConverters;
   FileProgress fileProgress;
 
@@ -46,7 +51,7 @@ void NuScenes2Bag::convertDirectory(
   }
 
   RunEvery showProgress(std::chrono::milliseconds(1000), [&fileProgress]() {
-    std::cout << "Progress: " << fileProgress.getProgressPercentage() << " ["
+    std::cout << "Progress: " << static_cast<int>(fileProgress.getProgressPercentage() * 100) << " ["
               << fileProgress.processedFiles << "/"
               << fileProgress.toProcessFiles << "]" << std::endl;
   });

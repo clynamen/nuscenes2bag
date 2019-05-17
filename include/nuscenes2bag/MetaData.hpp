@@ -18,11 +18,13 @@ struct SceneInfo {
 };
 
 struct SampleInfo {
+    Token scene_token;
     Token token;
     TimeStamp timeStamp;
 };
 
 struct SampleDataInfo {
+    // Token scene_token;
     Token token;
     TimeStamp timeStamp;
     Token egoPoseToken;
@@ -35,8 +37,8 @@ struct SampleDataInfo {
 struct EgoPoseInfo {
     Token token;
     TimeStamp timeStamp;
+    double translation[3];
     double rotation[4];
-    double translation[4];
 };
 
 template <> std::string to_debug_string(const SceneInfo& t);
