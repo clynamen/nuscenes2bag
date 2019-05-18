@@ -38,3 +38,16 @@ Value &getExistingOrDefault(Container<Key, Value, TArgs...> &container,
     return it->second;
   }
 }
+
+template <typename T, typename U> void assignArray2Vector3(T& vector3, const U* ar) {
+    vector3.x = ar[0];
+    vector3.y = ar[1];
+    vector3.z = ar[2];
+}
+
+template <typename T, typename U> void assignArray2Quaternion(T& quat, const U* ar) {
+    quat.x = ar[1];
+    quat.y = ar[2];
+    quat.z = ar[3];
+    quat.w = ar[0];
+}

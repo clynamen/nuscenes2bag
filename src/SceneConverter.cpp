@@ -54,8 +54,9 @@ void SceneConverter::submit(const Token &sceneToken,
   SceneInfo &sceneInfo = sceneInfoOpt.value();
 
   sceneId = sceneInfo.sceneId;
-  sampleDatas = metaDataProvider.getSceneSampleData(sceneInfo.token);
-  egoPoseInfos = metaDataProvider.getEgoPoseInfo(sceneInfo.token);
+  this->sceneToken = sceneToken;
+  sampleDatas = metaDataProvider.getSceneSampleData(sceneToken);
+  egoPoseInfos = metaDataProvider.getEgoPoseInfo(sceneToken);
 
   for (const auto &sampleData : sampleDatas) {
     // cout << to_debug_string(sampleData) << endl;
@@ -73,14 +74,16 @@ void SceneConverter::run(const std::filesystem::path &inPath,
   rosbag::Bag outBag;
   outBag.open(bagName, rosbag::bagmode::Write);
 
-  convertEgoPoseInfos(outBag);
+  auto sensorInfos = metaDataProvider.getSceneCalibratedSensorInfo(sceneToken); 
+  convertEgoPoseInfos(outBag, sensorInfos);
   convertSampleDatas(outBag, inPath, fileProgress);
 
   outBag.close();
 }
 
-void SceneConverter::convertSampleDatas(
-    rosbag::Bag &outBag, const std::filesystem::path &inPath, FileProgress& fileProgress) {
+void SceneConverter::convertSampleDatas(rosbag::Bag &outBag,
+                                        const std::filesystem::path &inPath,
+                                        FileProgress &fileProgress) {
   for (const auto &sampleData : sampleDatas) {
     std::filesystem::path sampleFilePath = inPath / sampleData.fileName;
     auto sampleTypeOpt = getSampleType(sampleFilePath.string());
@@ -92,16 +95,23 @@ void SceneConverter::convertSampleDatas(
     std::smatch m;
     auto filenameString = sampleFilePath.filename().string();
     auto matched = std::regex_search(filenameString, m, TOPIC_REGEX);
-    std::string topicName = toLower(m.str(1));
-    assert(!topicName.empty());
+    std::string sensorName = toLower(m.str(1));
+    assert(!sensorName.empty());
+
+    CalibratedSensorInfo calibratedSensorInfo =
+        metaDataProvider.getCalibratedSensorInfo(
+            sampleData.calibratedSensorToken);
 
     if (sampleType == SampleType::CAMERA) {
+      auto topicName = sensorName + "/raw";
       writeMsg(topicName, sampleData.timeStamp, outBag,
                readImageFile(sampleFilePath));
     } else if (sampleType == SampleType::LIDAR) {
+      auto topicName = sensorName;
       writeMsg(topicName, sampleData.timeStamp, outBag,
                readLidarFile(sampleFilePath));
     } else if (sampleType == SampleType::RADAR) {
+      auto topicName = sensorName;
       writeMsg(topicName, sampleData.timeStamp, outBag,
                readRadarFile(sampleFilePath));
     } else {
@@ -112,7 +122,23 @@ void SceneConverter::convertSampleDatas(
   }
 }
 
-geometry_msgs::TransformStamped makeIdentityTransform(ros::Time stamp, const char* frame_id, const char* child_frame_id) {
+geometry_msgs::TransformStamped makeTransform(const char *frame_id,
+                                              const char *child_frame_id,
+                                              const double *translation,
+                                              const double *rotation,
+                                              ros::Time stamp = ros::Time(0)) {
+  geometry_msgs::TransformStamped msg;
+  msg.header.frame_id = std::string(frame_id);
+  msg.header.stamp = stamp;
+  msg.child_frame_id = std::string(child_frame_id);
+  assignArray2Vector3(msg.transform.translation, translation);
+  assignArray2Quaternion(msg.transform.rotation, rotation);
+  return msg;
+}
+
+geometry_msgs::TransformStamped
+makeIdentityTransform(const char *frame_id, const char *child_frame_id,
+                      ros::Time stamp = ros::Time(0)) {
   geometry_msgs::TransformStamped msg;
   msg.header.frame_id = std::string(frame_id);
   msg.header.stamp = stamp;
@@ -121,18 +147,37 @@ geometry_msgs::TransformStamped makeIdentityTransform(ros::Time stamp, const cha
   return msg;
 }
 
-void SceneConverter::convertEgoPoseInfos(rosbag::Bag &outBag) {
+void SceneConverter::convertEgoPoseInfos(
+    rosbag::Bag &outBag,
+    const std::vector<CalibratedSensorInfo> &calibratedSensorInfos) {
+
+  std::vector<geometry_msgs::TransformStamped> constantTransforms;
+  for (const auto &calibratedSensorInfo : calibratedSensorInfos) {
+    auto sensorTransform = makeTransform(
+        "base_link", calibratedSensorInfo.token.c_str(),
+        calibratedSensorInfo.translation, calibratedSensorInfo.rotation);
+    constantTransforms.push_back(sensorTransform);
+  }
+  geometry_msgs::TransformStamped tfMap2Odom =
+      makeIdentityTransform("map", "odom");
+  constantTransforms.push_back(tfMap2Odom);
+
   const std::string odomTopic = "/odom";
   for (const auto &egoPose : egoPoseInfos) {
+    // write odom
     nav_msgs::Odometry odomMsg = egoPoseInfo2OdometryMsg(egoPose);
     outBag.write(odomTopic.c_str(), odomMsg.header.stamp, odomMsg);
-    
 
-    geometry_msgs::TransformStamped tfMap2Odom = makeIdentityTransform(odomMsg.header.stamp, "map", "odom");
-    geometry_msgs::TransformStamped tfOdom2Base = egoPoseInfo2TransformStamped(egoPose);
+    // write TFs
+    geometry_msgs::TransformStamped tfOdom2Base =
+        egoPoseInfo2TransformStamped(egoPose);
     tf::tfMessage tfMsg;
-    tfMsg.transforms.push_back(tfMap2Odom);
     tfMsg.transforms.push_back(tfOdom2Base);
+    for (const auto &constantTransform : constantTransforms) {
+      auto constantTransformWithNewStamp = constantTransform;
+      constantTransformWithNewStamp.header.stamp = odomMsg.header.stamp;
+      tfMsg.transforms.push_back(constantTransformWithNewStamp);
+    }
     outBag.write("/tf", odomMsg.header.stamp, tfMsg);
   }
 }

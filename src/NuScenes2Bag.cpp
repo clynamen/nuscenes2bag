@@ -47,11 +47,13 @@ void NuScenes2Bag::convertDirectory(
     boost::asio::defer(pool, [&, sceneConverterPtr]() {
       sceneConverterPtr->run(inDatasetPath, outputRosbagPath, fileProgress);
     });
-    // std::cout << to_debug_string(set) << std::endl;
+
+    // TODO: remove break
+    break;
   }
 
   RunEvery showProgress(std::chrono::milliseconds(1000), [&fileProgress]() {
-    std::cout << "Progress: " << static_cast<int>(fileProgress.getProgressPercentage() * 100) << " ["
+    std::cout << "Progress: " << static_cast<int>(fileProgress.getProgressPercentage() * 100) << "% ["
               << fileProgress.processedFiles << "/"
               << fileProgress.toProcessFiles << "]" << std::endl;
   });

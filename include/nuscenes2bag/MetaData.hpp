@@ -1,12 +1,15 @@
 #pragma once 
 
 #include <string>
+#include <optional>
+#include <array>
 
 #include "nuscenes2bag/ToDebugString.hpp"
 
 typedef std::string Token;
 typedef uint64_t TimeStamp;
 typedef uint32_t SceneId;
+typedef std::array<std::array<double, 3>, 3> IntrinsicsMatrix;
 
 struct SceneInfo {
     Token token; 
@@ -32,6 +35,19 @@ struct SampleDataInfo {
     std::string fileFormat;
     bool isKeyFrame;
     std::string fileName;
+};
+
+struct CalibratedSensorInfo {
+    Token token;
+    Token sensorToken;
+    double translation[3];
+    double rotation[4];
+    std::optional<IntrinsicsMatrix> cameraIntrinsics;
+
+    inline friend bool operator<(const CalibratedSensorInfo& l, const CalibratedSensorInfo& r)
+    {
+        return l.token < r.token;
+    }
 };
 
 struct EgoPoseInfo {
