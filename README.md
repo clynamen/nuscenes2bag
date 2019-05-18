@@ -29,6 +29,13 @@ Currently work in progress
 - [x] Radar support
 - [x] EgoPose and TF support
 - [x] Show progress
+- [ ] Use range library
 - [ ] Better usability
 
 Create an Github issue for suggestion, bug and requests. 
+
+## Thirdparty
+
+Built using:
+
+ - https://github.com/nlohmann/json
