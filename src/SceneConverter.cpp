@@ -95,25 +95,35 @@ void SceneConverter::convertSampleDatas(rosbag::Bag &outBag,
     std::smatch m;
     auto filenameString = sampleFilePath.filename().string();
     auto matched = std::regex_search(filenameString, m, TOPIC_REGEX);
-    std::string sensorName = toLower(m.str(1));
-    assert(!sensorName.empty());
+    // std::string sensorName = toLower(m.str(1));
+    // assert(!sensorName.empty());
 
     CalibratedSensorInfo calibratedSensorInfo =
         metaDataProvider.getCalibratedSensorInfo(
             sampleData.calibratedSensorToken);
+    CalibratedSensorName calibratedSensorName =
+        metaDataProvider.getSensorName(
+            calibratedSensorInfo.sensorToken);
+    std::string sensorName = toLower(calibratedSensorName.name);
 
     if (sampleType == SampleType::CAMERA) {
       auto topicName = sensorName + "/raw";
+      auto msg = readImageFile(sampleFilePath); 
+      msg->header.frame_id = sensorName;
       writeMsg(topicName, sampleData.timeStamp, outBag,
-               readImageFile(sampleFilePath));
+               msg);
     } else if (sampleType == SampleType::LIDAR) {
       auto topicName = sensorName;
+      auto msg = readLidarFile(sampleFilePath); 
+      msg->header.frame_id = sensorName;
       writeMsg(topicName, sampleData.timeStamp, outBag,
-               readLidarFile(sampleFilePath));
+               msg);
     } else if (sampleType == SampleType::RADAR) {
       auto topicName = sensorName;
+      auto msg = readRadarFile(sampleFilePath); 
+      msg->header.frame_id = sensorName;
       writeMsg(topicName, sampleData.timeStamp, outBag,
-               readRadarFile(sampleFilePath));
+               msg);
     } else {
       cout << "Unknown sample type" << endl;
     }
@@ -149,13 +159,13 @@ makeIdentityTransform(const char *frame_id, const char *child_frame_id,
 
 void SceneConverter::convertEgoPoseInfos(
     rosbag::Bag &outBag,
-    const std::vector<CalibratedSensorInfo> &calibratedSensorInfos) {
+    const std::vector<CalibratedSensorInfoAndName> &calibratedSensorInfos) {
 
   std::vector<geometry_msgs::TransformStamped> constantTransforms;
   for (const auto &calibratedSensorInfo : calibratedSensorInfos) {
     auto sensorTransform = makeTransform(
-        "base_link", calibratedSensorInfo.token.c_str(),
-        calibratedSensorInfo.translation, calibratedSensorInfo.rotation);
+        "base_link", toLower(calibratedSensorInfo.name.name).c_str(),
+        calibratedSensorInfo.info.translation, calibratedSensorInfo.info.rotation);
     constantTransforms.push_back(sensorTransform);
   }
   geometry_msgs::TransformStamped tfMap2Odom =

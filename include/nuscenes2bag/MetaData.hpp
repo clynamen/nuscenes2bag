@@ -43,10 +43,21 @@ struct CalibratedSensorInfo {
     double translation[3];
     double rotation[4];
     std::optional<IntrinsicsMatrix> cameraIntrinsics;
+};
 
-    inline friend bool operator<(const CalibratedSensorInfo& l, const CalibratedSensorInfo& r)
+struct CalibratedSensorName {
+    Token token;
+    std::string name;
+    std::string modality;
+};
+
+struct CalibratedSensorInfoAndName {
+    CalibratedSensorInfo info;
+    CalibratedSensorName name;
+
+    inline friend bool operator<(const CalibratedSensorInfoAndName& l, const CalibratedSensorInfoAndName& r)
     {
-        return l.token < r.token;
+        return l.info.token < r.info.token;
     }
 };
 

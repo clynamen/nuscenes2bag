@@ -19,12 +19,15 @@ void MetaDataReader::loadFromDirectory(const fs::path &directoryPath) {
   const fs::path egoPoseFile = directoryPath / "ego_pose.json";
   const fs::path calibratedSensorFile =
       directoryPath / "calibrated_sensor.json";
+  const fs::path sensorFile =
+      directoryPath / "sensor.json";
 
   scenes = loadScenesFromFile(sceneFile);
   scene2Samples = loadSampleInfos(sampleFile);
   sample2SampleData = loadSampleDataInfos(sampleDataFile);
   calibratedSensorToken2CalibratedSensorInfo =
       loadCalibratedSensorInfo(calibratedSensorFile);
+  sensorToken2CalibratedSensorName = loadCalibratedSensorNames(sensorFile);
 
   // build inverse (EgoPose.token -> Scene.token) map
   // and (scene.token -> calibratedSensor[]) map
@@ -39,9 +42,17 @@ void MetaDataReader::loadFromDirectory(const fs::path &directoryPath) {
         auto &calibratedSensorInfoSet =
             getExistingOrDefault(scene2CalibratedSensorInfo, sceneToken);
         const auto &calibratedSensorInfo =
-            calibratedSensorToken2CalibratedSensorInfo.find(sampleData.calibratedSensorToken)
+            calibratedSensorToken2CalibratedSensorInfo
+                .find(sampleData.calibratedSensorToken)
                 ->second;
-        calibratedSensorInfoSet.insert(calibratedSensorInfo);
+        const auto &calibratedSensorName =
+            sensorToken2CalibratedSensorName
+                .find(calibratedSensorInfo.sensorToken)
+                ->second;
+        calibratedSensorInfoSet.insert(CalibratedSensorInfoAndName{
+          calibratedSensorInfo,
+          calibratedSensorName
+        });
       }
     }
   }
@@ -197,6 +208,21 @@ std::map<Token, CalibratedSensorInfo> MetaDataReader::loadCalibratedSensorInfo(
   return calibratedSensorToken2CalibratedSensorInfo;
 }
 
+std::map<Token, CalibratedSensorName> MetaDataReader::loadCalibratedSensorNames(
+    const std::filesystem::path &filePath) {
+  auto calibratedSensorNameJsons = slurpJsonFile(filePath);
+  std::map<Token, CalibratedSensorName> sensorToken2CalibratedSensorName;
+
+  for (const auto &calibratedSensorNameJson : calibratedSensorNameJsons) {
+    sensorToken2CalibratedSensorName.emplace(calibratedSensorNameJson["token"], 
+      CalibratedSensorName{
+      calibratedSensorNameJson["token"], calibratedSensorNameJson["channel"],
+          calibratedSensorNameJson["modality"]});
+  };
+
+  return sensorToken2CalibratedSensorName;
+}
+
 std::vector<Token> MetaDataReader::getAllSceneTokens() const {
   assert(loadFromDirectoryCalled);
   std::vector<Token> tokens;
@@ -257,9 +283,14 @@ CalibratedSensorInfo MetaDataReader::getCalibratedSensorInfo(
       ->second;
 }
 
-std::vector<CalibratedSensorInfo>
+CalibratedSensorName
+MetaDataReader::getSensorName(const Token &sensorToken) const {
+  return sensorToken2CalibratedSensorName.find(sensorToken)->second;
+}
+
+std::vector<CalibratedSensorInfoAndName>
 MetaDataReader::getSceneCalibratedSensorInfo(const Token &sceneToken) const {
-  std::vector<CalibratedSensorInfo> sceneCalibratedSensorInfo;
+  std::vector<CalibratedSensorInfoAndName> sceneCalibratedSensorInfo;
   const auto &sceneCalibratedSensorInfoSet =
       scene2CalibratedSensorInfo.find(sceneToken)->second;
   std::copy(sceneCalibratedSensorInfoSet.begin(),

@@ -16,6 +16,10 @@ public:
   getEgoPoseInfo(const Token &sceneToken) const = 0;
   virtual CalibratedSensorInfo
   getCalibratedSensorInfo(const Token &calibratedSensorToken) const = 0;
-  virtual std::vector<CalibratedSensorInfo>
+  virtual std::vector<CalibratedSensorInfoAndName>
   getSceneCalibratedSensorInfo(const Token &sceneToken) const = 0;
+  virtual CalibratedSensorName
+  getSensorName(const Token &sensorToken) const = 0;
+
+
 };
