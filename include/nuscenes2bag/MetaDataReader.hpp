@@ -9,6 +9,8 @@
 #include "nuscenes2bag/MetaDataProvider.hpp"
 #include "nuscenes2bag/ToDebugString.hpp"
 
+namespace nuscenes2bag {
+
 class MetaDataReader : public MetaDataProvider {
 public:
   void loadFromDirectory(const std::filesystem::path &directoryPath);
@@ -52,3 +54,5 @@ private:
   std::map<Token, CalibratedSensorName> sensorToken2CalibratedSensorName;
   bool loadFromDirectoryCalled = false;
 };
+
+}

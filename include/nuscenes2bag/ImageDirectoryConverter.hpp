@@ -9,4 +9,8 @@
 
 #include <filesystem>
 
+namespace nuscenes2bag {
+
 std::optional<sensor_msgs::Image> readImageFile(std::filesystem::path filePath);
+
+}

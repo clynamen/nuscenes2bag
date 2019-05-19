@@ -6,6 +6,8 @@
 #include "nuscenes2bag/FileProgress.hpp"
 #include "rosbag/bag.h"
 
+namespace nuscenes2bag {
+
 class SceneConverter {
     public:
     SceneConverter(const MetaDataProvider& metaDataProvider);
@@ -24,3 +26,5 @@ class SceneConverter {
     SceneId sceneId;
     Token sceneToken;
 };
+
+}

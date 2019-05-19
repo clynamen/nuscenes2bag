@@ -6,6 +6,8 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
+namespace nuscenes2bag {
+
 struct PclRadarObject {
   //   FIELDS x y z dyn_prop id
   // SIZE 4 4 4 1 2
@@ -37,8 +39,10 @@ struct PclRadarObject {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 } EIGEN_ALIGN16;
 
+}
+
 POINT_CLOUD_REGISTER_POINT_STRUCT(
-    PclRadarObject, 
+    nuscenes2bag::PclRadarObject, 
     (float, x, x)
     (float, y, y)
     (float, z, z)

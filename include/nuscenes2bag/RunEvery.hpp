@@ -2,6 +2,8 @@
 
 #include <chrono>
 
+namespace nuscenes2bag {
+
 template <typename T> class RunEvery {
 public:
   RunEvery(std::chrono::milliseconds periodMs, T &&lambda)
@@ -22,3 +24,5 @@ public:
   std::chrono::milliseconds periodMs;
   T lambda;
 };
+
+}

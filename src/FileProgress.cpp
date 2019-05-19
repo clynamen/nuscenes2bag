@@ -1,6 +1,8 @@
 #include "nuscenes2bag/FileProgress.hpp"
 #include <iostream>
 
+namespace nuscenes2bag {
+
 FileProgress::FileProgress()
   : processedFiles(0)
   , toProcessFiles(0)
@@ -22,4 +24,6 @@ float
 FileProgress::getProgressPercentage()
 {
   return ((double)processedFiles) / toProcessFiles;
+}
+
 }

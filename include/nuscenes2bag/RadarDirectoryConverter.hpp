@@ -5,5 +5,8 @@
 
 #include <filesystem>
 
+namespace nuscenes2bag {
 
 std::optional<nuscenes2bag::RadarObjects> readRadarFile(const std::filesystem::path& filePath);
+
+}

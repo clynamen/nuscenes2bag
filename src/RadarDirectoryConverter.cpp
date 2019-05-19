@@ -6,6 +6,8 @@ using namespace sensor_msgs;
 using namespace std;
 using namespace nuscenes2bag;
 
+namespace nuscenes2bag {
+
 std::optional<RadarObjects>
 readRadarFile(const std::filesystem::path& filePath)
 {
@@ -48,4 +50,6 @@ readRadarFile(const std::filesystem::path& filePath)
   }
 
   return std::optional(radarObjects);
+}
+
 }

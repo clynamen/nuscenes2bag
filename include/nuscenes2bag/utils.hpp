@@ -5,6 +5,8 @@
 #include "ros/ros.h"
 #include <string>
 
+namespace nuscenes2bag {
+
 std::string toLower(const std::string_view &str);
 
 bool string_icontains(const std::string_view &string,
@@ -50,4 +52,6 @@ template <typename T, typename U> void assignArray2Quaternion(T& quat, const U* 
     quat.y = ar[2];
     quat.z = ar[3];
     quat.w = ar[0];
+}
+
 }

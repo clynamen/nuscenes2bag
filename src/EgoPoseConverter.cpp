@@ -6,6 +6,8 @@
 #include "nuscenes2bag/utils.hpp"
 #include <nuscenes2bag/MetaDataTypes.hpp>
 
+namespace nuscenes2bag {
+
 nav_msgs::Odometry
 egoPoseInfo2OdometryMsg(const EgoPoseInfo& egoPoseInfo)
 {
@@ -32,4 +34,6 @@ egoPoseInfo2TransformStamped(const EgoPoseInfo& egoPoseInfo)
   assignArray2Quaternion(msg.transform.rotation, egoPoseInfo.rotation);
 
   return msg;
+}
+
 }

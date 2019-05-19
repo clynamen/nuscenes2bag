@@ -1,6 +1,8 @@
 #include "nuscenes2bag/MetaDataTypes.hpp"
 #include <sstream>
 
+namespace nuscenes2bag {
+
 template<>
 std::string
 to_debug_string(const SceneInfo& o)
@@ -20,6 +22,7 @@ to_debug_string(const SampleInfo& o)
   os << SHOW_FIRST_MEMBER(token) << SHOW_LAST_MEMBER(timeStamp);
   return os.str();
 }
+
 template<>
 std::string
 to_debug_string(const SampleDataInfo& o)
@@ -27,4 +30,6 @@ to_debug_string(const SampleDataInfo& o)
   std::ostringstream os;
   os << "{" << SHOW_FIRST_MEMBER(token) << SHOW_LAST_MEMBER(fileName);
   return os.str();
+}
+
 }

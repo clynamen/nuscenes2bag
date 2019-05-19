@@ -14,6 +14,8 @@
 
 using namespace std;
 
+namespace nuscenes2bag {
+
 SceneConverter::SceneConverter(const MetaDataProvider& metaDataProvider)
   : metaDataProvider(metaDataProvider)
 {}
@@ -207,4 +209,6 @@ SceneConverter::convertEgoPoseInfos(
     }
     outBag.write("/tf", odomMsg.header.stamp, tfMsg);
   }
+}
+
 }

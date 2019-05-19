@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+namespace nuscenes2bag {
+
 std::string
 toLower(const std::string_view& str)
 {
@@ -54,4 +56,6 @@ topicNameForCamera(const std::string& dirName)
                  std::back_inserter(lowerDirName),
                  ::tolower);
   return std::string("/") + lowerDirName + "/image";
+}
+
 }

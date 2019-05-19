@@ -12,6 +12,8 @@ using namespace std;
 namespace fs = std::filesystem;
 namespace json = nlohmann;
 
+namespace nuscenes2bag {
+
 void
 MetaDataReader::loadFromDirectory(const fs::path& directoryPath)
 {
@@ -318,4 +320,6 @@ MetaDataReader::getSceneCalibratedSensorInfo(const Token& sceneToken) const
             sceneCalibratedSensorInfoSet.end(),
             std::back_inserter(sceneCalibratedSensorInfo));
   return sceneCalibratedSensorInfo;
+}
+
 }

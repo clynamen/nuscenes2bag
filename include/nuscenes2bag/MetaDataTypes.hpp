@@ -7,6 +7,8 @@
 #include "nuscenes2bag/ToDebugString.hpp"
 #include "nuscenes2bag/DatasetTypes.hpp"
 
+namespace nuscenes2bag {
+
 struct SceneInfo {
     Token token; 
     uint32_t sampleNumber;
@@ -67,3 +69,5 @@ struct EgoPoseInfo {
 template <> std::string to_debug_string(const SceneInfo& t);
 template <> std::string to_debug_string(const SampleInfo& t);
 template <> std::string to_debug_string(const SampleDataInfo& t);
+
+}

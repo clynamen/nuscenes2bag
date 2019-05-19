@@ -18,6 +18,8 @@
 using namespace std;
 namespace fs = std::filesystem;
 
+namespace nuscenes2bag {
+
 NuScenes2Bag::NuScenes2Bag() {}
 
 void
@@ -67,4 +69,6 @@ NuScenes2Bag::convertDirectory(const std::filesystem::path& inDatasetPath,
   }
 
   pool.join();
+}
+
 }

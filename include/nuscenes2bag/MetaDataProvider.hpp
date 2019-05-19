@@ -3,6 +3,9 @@
 #include <optional>
 #include <vector>
 
+
+namespace nuscenes2bag {
+
 class MetaDataProvider {
 public:
   virtual ~MetaDataProvider() = default;
@@ -23,3 +26,5 @@ public:
 
 
 };
+
+}

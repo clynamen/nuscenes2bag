@@ -8,6 +8,8 @@
 #include <optional>
 #include <vector>
 
+namespace nuscenes2bag {
+
 struct NuScenes2Bag {
 
 public:
@@ -20,3 +22,5 @@ public:
 private:
   std::string inDatasetPathString;
 };
+
+}

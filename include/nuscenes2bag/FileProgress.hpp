@@ -2,6 +2,8 @@
 
 #include <atomic>
 
+namespace nuscenes2bag {
+
 class FileProgress {
     public:
         FileProgress();
@@ -16,3 +18,5 @@ class FileProgress {
         std::atomic<uint32_t> processedFiles;
         std::atomic<uint32_t> toProcessFiles;
 };
+
+}

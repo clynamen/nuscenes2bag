@@ -3,6 +3,7 @@
 #include <boost/program_options.hpp>
 
 using namespace boost::program_options;
+using namespace nuscenes2bag;
 
 int
 main(const int argc, const char* argv[])

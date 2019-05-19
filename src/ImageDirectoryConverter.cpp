@@ -4,6 +4,8 @@
 
 namespace fs = std::filesystem;
 
+namespace nuscenes2bag {
+
 std::optional<sensor_msgs::Image>
 readImageFile(std::filesystem::path filePath)
 {
@@ -12,4 +14,6 @@ readImageFile(std::filesystem::path filePath)
   sensor_msgs::ImagePtr msg =
     cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
   return std::optional(*msg);
+}
+
 }
