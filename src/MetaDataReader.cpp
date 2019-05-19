@@ -322,4 +322,15 @@ MetaDataReader::getSceneCalibratedSensorInfo(const Token& sceneToken) const
   return sceneCalibratedSensorInfo;
 }
 
+std::optional<SceneInfo>
+MetaDataReader::getSceneInfoByNumber(const uint32_t sceneNumber) const {
+  std::optional<SceneInfo> sceneInfoOpt;
+  for(const auto& scene: scenes) {
+    if(scene.sceneId == sceneNumber) {
+      sceneInfoOpt = scene;
+    }
+  }
+  return sceneInfoOpt;
+}
+
 }

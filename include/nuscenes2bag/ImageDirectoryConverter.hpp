@@ -11,6 +11,6 @@
 
 namespace nuscenes2bag {
 
-std::optional<sensor_msgs::Image> readImageFile(std::filesystem::path filePath);
+std::optional<sensor_msgs::Image> readImageFile(const std::filesystem::path& filePath) noexcept;
 
 }

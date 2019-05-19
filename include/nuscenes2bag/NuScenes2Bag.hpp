@@ -17,7 +17,7 @@ public:
 
   void convertDirectory(const std::filesystem::path &inDatasetPath,
                         const std::filesystem::path &outputRosbagPath, 
-                        int32_t threadNumber);
+                        int32_t threadNumber, std::optional<int32_t> sceneNumberOpt);
 
 private:
   std::string inDatasetPathString;

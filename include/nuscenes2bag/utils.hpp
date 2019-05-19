@@ -4,6 +4,10 @@
 
 #include "ros/ros.h"
 #include <string>
+#include <iostream>
+#include <exception>
+
+#define PRINT_EXCEPTION(e) std::cout << "[ERROR] Exception thrown: " << __FILE__ << ":" << __LINE__ << " " << e.what() << std::endl;
 
 namespace nuscenes2bag {
 
@@ -46,5 +50,18 @@ template <typename T, typename U> void assignArray2Quaternion(T& quat, const U* 
     quat.z = ar[3];
     quat.w = ar[0];
 }
+
+class UnableToParseFileException : public std::exception {
+  private:
+    std::string msg;
+
+  public:
+    UnableToParseFileException(const std::string& fileName) {
+      msg += "Unable to parse ";
+      msg += fileName;
+    };
+    ~UnableToParseFileException() throw() {};
+    const char *what() const throw() { return this->msg.c_str(); };
+};
 
 }

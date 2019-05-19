@@ -28,6 +28,8 @@ public:
   getSceneCalibratedSensorInfo(const Token &sceneToken) const override;
   CalibratedSensorName
   getSensorName(const Token &sensorToken) const override;
+  std::optional<SceneInfo>
+  getSceneInfoByNumber(const uint32_t sceneNumber) const override;
 
 private:
   static nlohmann::json slurpJsonFile(const std::filesystem::path &filePath);

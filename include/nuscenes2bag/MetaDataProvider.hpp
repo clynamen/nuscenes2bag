@@ -13,6 +13,8 @@ public:
   virtual std::vector<Token> getAllSceneTokens() const = 0;
   virtual std::optional<SceneInfo>
   getSceneInfo(const Token &sceneToken) const = 0;
+  virtual std::optional<SceneInfo>
+  getSceneInfoByNumber(const uint32_t sceneNumber) const = 0;
   virtual std::vector<SampleDataInfo>
   getSceneSampleData(const Token &sceneSampleData) const = 0;
   virtual std::vector<EgoPoseInfo>

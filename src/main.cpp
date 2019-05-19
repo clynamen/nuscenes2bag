@@ -12,12 +12,14 @@ main(const int argc, const char* argv[])
     std::string sampleDir;
     std::string outputBagName;
     int32_t threadNumber;
+    int32_t sceneNumber = -1;
 
     options_description desc{ "Options" };
     desc.add_options()("help,h", "show help");
 
     options_description inputDesc{ "input" };
     inputDesc.add_options()(
+      "scene_number,n", value<int32_t>(&sceneNumber), "only convert a given scene")(
       "sample_dir,s", value<std::string>(&sampleDir), "input directory")(
       "out,o", value<std::string>(&outputBagName), "output bag name")(
       "jobs,j",
@@ -36,7 +38,12 @@ main(const int argc, const char* argv[])
       NuScenes2Bag converter{};
 
       std::filesystem::path sampleDirPath(sampleDir);
-      converter.convertDirectory(sampleDir, outputBagName, threadNumber);
+
+      std::optional<int32_t> sceneNumberOpt;
+      if(sceneNumber >= 0) {
+        sceneNumberOpt = sceneNumber;
+      }
+      converter.convertDirectory(sampleDir, outputBagName, threadNumber, sceneNumberOpt);
     }
   } catch (const error& ex) {
     std::cerr << ex.what() << '\n';

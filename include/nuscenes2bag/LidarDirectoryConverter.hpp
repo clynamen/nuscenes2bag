@@ -6,6 +6,6 @@
 
 namespace nuscenes2bag {
 
-std::optional<sensor_msgs::PointCloud2> readLidarFile(std::filesystem::path filePath);
+std::optional<sensor_msgs::PointCloud2> readLidarFile(const std::filesystem::path& filePath);
 
 }
