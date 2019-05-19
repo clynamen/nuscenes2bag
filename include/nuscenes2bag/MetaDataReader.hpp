@@ -11,6 +11,19 @@
 
 namespace nuscenes2bag {
 
+class InvalidMetaDataException : public std::exception
+{
+private:
+  std::string msg;
+
+public:
+  InvalidMetaDataException(const std::string& msg)
+    : msg(msg)
+  {}
+  ~InvalidMetaDataException() throw(){}
+  const char* what() const throw() { return this->msg.c_str(); }
+};
+
 class MetaDataReader : public MetaDataProvider {
 public:
   void loadFromDirectory(const std::filesystem::path &directoryPath);

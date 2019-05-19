@@ -14,6 +14,32 @@ namespace json = nlohmann;
 
 namespace nuscenes2bag {
 
+template<typename T>
+void
+throwKeyNotFound(const T& key, const char* msg)
+{
+  std::string errorMsg = "MetaDataError: ";
+  errorMsg += msg;
+  errorMsg += " [" + key + "]";
+  throw InvalidMetaDataException(errorMsg);
+}
+
+template<template<class, class, class...> class Container,
+         class Key,
+         class Value,
+         class... TArgs>
+const Value&
+findOrThrow(const Container<Key, Value, TArgs...>& container,
+            const Key& key,
+            const char* msg)
+{
+  auto it = container.find(key);
+  if (it == container.end()) {
+    throwKeyNotFound<Key>(key, msg);
+  }
+  return it->second;
+}
+
 void
 MetaDataReader::loadFromDirectory(const fs::path& directoryPath)
 {
@@ -42,16 +68,17 @@ MetaDataReader::loadFromDirectory(const fs::path& directoryPath)
         // add egoPoseInfo
         egoPoseToken2sceneToken.emplace(sampleData.egoPoseToken, sceneToken);
 
+        // add calibrated sensor info
         auto& calibratedSensorInfoSet =
           getExistingOrDefault(scene2CalibratedSensorInfo, sceneToken);
         const auto& calibratedSensorInfo =
-          calibratedSensorToken2CalibratedSensorInfo
-            .find(sampleData.calibratedSensorToken)
-            ->second;
+          findOrThrow(calibratedSensorToken2CalibratedSensorInfo,
+                      sampleData.calibratedSensorToken,
+                      "unable to find calibrated sensor");
         const auto& calibratedSensorName =
-          sensorToken2CalibratedSensorName
-            .find(calibratedSensorInfo.sensorToken)
-            ->second;
+          findOrThrow(sensorToken2CalibratedSensorName,
+                      calibratedSensorInfo.sensorToken,
+                      "unable to find sensor");
         calibratedSensorInfoSet.insert(CalibratedSensorInfoAndName{
           calibratedSensorInfo, calibratedSensorName });
       }
@@ -175,17 +202,14 @@ MetaDataReader::loadEgoPoseInfos(
 
   for (const auto& egoPoseJson : egoPoseJsons) {
     Token sampleDataToken = egoPoseJson["token"];
-    const auto& sceneTokenIt = sampleDataToken2SceneToken.find(sampleDataToken);
-    if (sceneTokenIt == sampleDataToken2SceneToken.end()) {
-      cout << "unable to find " << sampleDataToken << " sample token" << endl;
-    } else {
-      const Token sceneToken = sceneTokenIt->second;
-      std::vector<EgoPoseInfo>& egoPoses =
-        getExistingOrDefault(sceneToken2EgoPoseInfos, sceneToken);
+    const auto& sceneToken = findOrThrow(sampleDataToken2SceneToken,
+                                         sampleDataToken,
+                                         " Unable to find sample token");
+    std::vector<EgoPoseInfo>& egoPoses =
+      getExistingOrDefault(sceneToken2EgoPoseInfos, sceneToken);
 
-      EgoPoseInfo egoPoseInfo = egoPoseJson2EgoPoseInfo(egoPoseJson);
-      egoPoses.push_back(egoPoseInfo);
-    }
+    EgoPoseInfo egoPoseInfo = egoPoseJson2EgoPoseInfo(egoPoseJson);
+    egoPoses.push_back(egoPoseInfo);
   }
 
   return sceneToken2EgoPoseInfos;
@@ -267,21 +291,11 @@ MetaDataReader::getSceneSampleData(const Token& sceneToken) const
 {
   std::vector<SampleDataInfo> sampleDataInfos;
 
-  const auto sceneSamplesIt = scene2Samples.find(sceneToken);
-  if (sceneSamplesIt == scene2Samples.end()) {
-    assert(false);
-    return sampleDataInfos;
-  }
-  const auto& sceneSamples = sceneSamplesIt->second;
+  const auto& sceneSamples = findOrThrow(scene2Samples, sceneToken, " sample for scene token");
   for (const auto& sceneSample : sceneSamples) {
     const Token& sceneSampleToken = sceneSample.token;
-    const auto sceneSampleDatasIt = sample2SampleData.find(sceneSampleToken);
-    if (sceneSampleDatasIt == sample2SampleData.end()) {
-      return sampleDataInfos;
-      assert(false);
-    }
+    const auto& sceneSampleDatas = findOrThrow(sample2SampleData, sceneSampleToken, " sample data for sample token");
 
-    const auto& sceneSampleDatas = sceneSampleDatasIt->second;
     for (const SampleDataInfo& sampleData : sceneSampleDatas) {
       sampleDataInfos.push_back(sampleData);
     }
@@ -293,21 +307,21 @@ MetaDataReader::getSceneSampleData(const Token& sceneToken) const
 std::vector<EgoPoseInfo>
 MetaDataReader::getEgoPoseInfo(const Token& sceneToken) const
 {
-  return scene2EgoPose.find(sceneToken)->second;
+  return findOrThrow(scene2EgoPose, sceneToken, "ego pose by scene token");
 }
 
 CalibratedSensorInfo
 MetaDataReader::getCalibratedSensorInfo(
   const Token& calibratedSensorToken) const
 {
-  return calibratedSensorToken2CalibratedSensorInfo.find(calibratedSensorToken)
-    ->second;
+  return findOrThrow(calibratedSensorToken2CalibratedSensorInfo, calibratedSensorToken, 
+  "calibrated sensor info by sensor token");
 }
 
 CalibratedSensorName
 MetaDataReader::getSensorName(const Token& sensorToken) const
 {
-  return sensorToken2CalibratedSensorName.find(sensorToken)->second;
+  return findOrThrow(sensorToken2CalibratedSensorName, sensorToken, "sensor name by sensor token");
 }
 
 std::vector<CalibratedSensorInfoAndName>
@@ -315,7 +329,7 @@ MetaDataReader::getSceneCalibratedSensorInfo(const Token& sceneToken) const
 {
   std::vector<CalibratedSensorInfoAndName> sceneCalibratedSensorInfo;
   const auto& sceneCalibratedSensorInfoSet =
-    scene2CalibratedSensorInfo.find(sceneToken)->second;
+    findOrThrow(scene2CalibratedSensorInfo, sceneToken, "calibrated sensor info by scene token");
   std::copy(sceneCalibratedSensorInfoSet.begin(),
             sceneCalibratedSensorInfoSet.end(),
             std::back_inserter(sceneCalibratedSensorInfo));
@@ -323,10 +337,11 @@ MetaDataReader::getSceneCalibratedSensorInfo(const Token& sceneToken) const
 }
 
 std::optional<SceneInfo>
-MetaDataReader::getSceneInfoByNumber(const uint32_t sceneNumber) const {
+MetaDataReader::getSceneInfoByNumber(const uint32_t sceneNumber) const
+{
   std::optional<SceneInfo> sceneInfoOpt;
-  for(const auto& scene: scenes) {
-    if(scene.sceneId == sceneNumber) {
+  for (const auto& scene : scenes) {
+    if (scene.sceneId == sceneNumber) {
       sceneInfoOpt = scene;
     }
   }
