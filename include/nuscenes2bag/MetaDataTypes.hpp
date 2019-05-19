@@ -5,11 +5,7 @@
 #include <array>
 
 #include "nuscenes2bag/ToDebugString.hpp"
-
-typedef std::string Token;
-typedef uint64_t TimeStamp;
-typedef uint32_t SceneId;
-typedef std::array<std::array<double, 3>, 3> IntrinsicsMatrix;
+#include "nuscenes2bag/DatasetTypes.hpp"
 
 struct SceneInfo {
     Token token; 

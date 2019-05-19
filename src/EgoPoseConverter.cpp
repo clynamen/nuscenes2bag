@@ -1,12 +1,14 @@
+#include "nuscenes2bag/utils.hpp"
 #include <geometry_msgs/TransformStamped.h>
 #include <nav_msgs/Odometry.h>
 #include <tf/tfMessage.h>
-#include "nuscenes2bag/utils.hpp"
 
 #include "nuscenes2bag/utils.hpp"
-#include <nuscenes2bag/MetaData.hpp>
+#include <nuscenes2bag/MetaDataTypes.hpp>
 
-nav_msgs::Odometry egoPoseInfo2OdometryMsg(const EgoPoseInfo &egoPoseInfo) {
+nav_msgs::Odometry
+egoPoseInfo2OdometryMsg(const EgoPoseInfo& egoPoseInfo)
+{
   nav_msgs::Odometry msg;
   msg.header.stamp = stampUs2RosTime(egoPoseInfo.timeStamp);
   msg.header.frame_id = "odom";
@@ -18,7 +20,9 @@ nav_msgs::Odometry egoPoseInfo2OdometryMsg(const EgoPoseInfo &egoPoseInfo) {
   return msg;
 }
 
-geometry_msgs::TransformStamped egoPoseInfo2TransformStamped(const EgoPoseInfo &egoPoseInfo) {
+geometry_msgs::TransformStamped
+egoPoseInfo2TransformStamped(const EgoPoseInfo& egoPoseInfo)
+{
   geometry_msgs::TransformStamped msg;
   msg.header.stamp = stampUs2RosTime(egoPoseInfo.timeStamp);
   msg.header.frame_id = "odom";

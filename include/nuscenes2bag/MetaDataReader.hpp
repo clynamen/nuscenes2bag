@@ -5,7 +5,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "nuscenes2bag/MetaData.hpp"
+#include "nuscenes2bag/MetaDataTypes.hpp"
 #include "nuscenes2bag/MetaDataProvider.hpp"
 #include "nuscenes2bag/ToDebugString.hpp"
 

@@ -20,11 +20,12 @@ namespace fs = std::filesystem;
 
 NuScenes2Bag::NuScenes2Bag() {}
 
-void NuScenes2Bag::convertDirectory(
-    const std::filesystem::path &inDatasetPath,
-    const std::filesystem::path &outputRosbagPath, 
-    int threadNumber) {
-  if(threadNumber < 1) {
+void
+NuScenes2Bag::convertDirectory(const std::filesystem::path& inDatasetPath,
+                               const std::filesystem::path& outputRosbagPath,
+                               int threadNumber)
+{
+  if (threadNumber < 1) {
     std::cout << "Forcing at least one job number (-j1)" << std::endl;
     threadNumber = 1;
   }
@@ -38,9 +39,9 @@ void NuScenes2Bag::convertDirectory(
   FileProgress fileProgress;
 
   fs::create_directories(outputRosbagPath);
-  for (const auto &sceneToken : metaDataReader.getAllSceneTokens()) {
+  for (const auto& sceneToken : metaDataReader.getAllSceneTokens()) {
     std::unique_ptr<SceneConverter> sceneConverter =
-        std::make_unique<SceneConverter>(metaDataReader);
+      std::make_unique<SceneConverter>(metaDataReader);
     sceneConverter->submit(sceneToken, fileProgress);
     SceneConverter* sceneConverterPtr = sceneConverter.get();
     sceneConverters.push_back(std::move(sceneConverter));
@@ -53,15 +54,16 @@ void NuScenes2Bag::convertDirectory(
   }
 
   RunEvery showProgress(std::chrono::milliseconds(1000), [&fileProgress]() {
-    std::cout << "Progress: " << static_cast<int>(fileProgress.getProgressPercentage() * 100) << "% ["
-              << fileProgress.processedFiles << "/"
+    std::cout << "Progress: "
+              << static_cast<int>(fileProgress.getProgressPercentage() * 100)
+              << "% [" << fileProgress.processedFiles << "/"
               << fileProgress.toProcessFiles << "]" << std::endl;
   });
 
   // TODO: replace check with futures
-  while(fileProgress.processedFiles != fileProgress.toProcessFiles) {
-      showProgress.update();
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  while (fileProgress.processedFiles != fileProgress.toProcessFiles) {
+    showProgress.update();
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
   pool.join();

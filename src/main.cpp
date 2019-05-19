@@ -1,24 +1,27 @@
-#include "nuscenes2bag/NuScenes2Bag.hpp"
 #include "nuscenes2bag/MetaDataReader.hpp"
+#include "nuscenes2bag/NuScenes2Bag.hpp"
 #include <boost/program_options.hpp>
 
 using namespace boost::program_options;
 
-int main(const int argc, const char *argv[]) {
+int
+main(const int argc, const char* argv[])
+{
   try {
     std::string sampleDir;
     std::string outputBagName;
     int32_t threadNumber;
 
-
-    options_description desc{"Options"};
+    options_description desc{ "Options" };
     desc.add_options()("help,h", "show help");
 
-    options_description inputDesc{"input"};
-    inputDesc.add_options()("sample_dir,s", value<std::string>(&sampleDir),
-                            "input directory")(
-        "out,o", value<std::string>(&outputBagName), "output bag name")
-        ("jobs,j", value<int32_t>(&threadNumber), "number of jobs (thread number)");
+    options_description inputDesc{ "input" };
+    inputDesc.add_options()(
+      "sample_dir,s", value<std::string>(&sampleDir), "input directory")(
+      "out,o", value<std::string>(&outputBagName), "output bag name")(
+      "jobs,j",
+      value<int32_t>(&threadNumber),
+      "number of jobs (thread number)");
     variables_map vm;
 
     desc.add(inputDesc);
@@ -31,10 +34,10 @@ int main(const int argc, const char *argv[]) {
     } else {
       NuScenes2Bag converter{};
 
-      std::filesystem::path sampleDirPath(sampleDir); 
+      std::filesystem::path sampleDirPath(sampleDir);
       converter.convertDirectory(sampleDir, outputBagName, threadNumber);
     }
-  } catch (const error &ex) {
+  } catch (const error& ex) {
     std::cerr << ex.what() << '\n';
   }
 
