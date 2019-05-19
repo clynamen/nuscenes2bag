@@ -14,13 +14,6 @@ bool string_icontains(const std::string_view &string,
 
 ros::Time stampUs2RosTime(uint64_t stampUs);
 
-std::string topicNameForSampleType(const std::string dirName,
-                                      const SampleType SampleType);
-
-std::string topicNameDefault(const std::string &dirName);
-
-std::string topicNameForCamera(const std::string &dirName);
-
 template <class T> T uniq(T t) {
   sort(t.begin(), t.end());
   t.erase(unique(t.begin(), t.end()), t.end());

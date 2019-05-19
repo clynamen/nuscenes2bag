@@ -29,33 +29,4 @@ stampUs2RosTime(uint64_t stampUs)
   return t;
 }
 
-std::string
-topicNameForSampleType(const std::string dirName, const SampleType SampleType)
-{
-  switch (SampleType) {
-    case SampleType::CAMERA:
-      return topicNameForCamera(dirName);
-      // default:
-      //     //pass
-  }
-  return topicNameDefault(dirName);
-}
-
-std::string
-topicNameDefault(const std::string& dirName)
-{
-  return std::string("/") + toLower(dirName);
-}
-
-std::string
-topicNameForCamera(const std::string& dirName)
-{
-  std::string lowerDirName;
-  std::transform(dirName.begin(),
-                 dirName.end(),
-                 std::back_inserter(lowerDirName),
-                 ::tolower);
-  return std::string("/") + lowerDirName + "/image";
-}
-
 }

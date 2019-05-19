@@ -20,8 +20,8 @@ public:
     }
   }
 
-  std::chrono::time_point<std::chrono::system_clock> lastExecutionTime;
   std::chrono::milliseconds periodMs;
+  std::chrono::time_point<std::chrono::system_clock> lastExecutionTime;
   T lambda;
 };
 

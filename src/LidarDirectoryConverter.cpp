@@ -33,8 +33,6 @@ readLidarFile(std::filesystem::path filePath)
       }
     }
 
-    uint32_t pointsRead = fileValues.size() / 4;
-
     cloud.width = fileValues.size() / 4;
 
     std::vector<uint8_t> data;

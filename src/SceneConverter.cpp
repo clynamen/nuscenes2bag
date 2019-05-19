@@ -69,9 +69,6 @@ SceneConverter::submit(const Token& sceneToken, FileProgress& fileProgress)
   sampleDatas = metaDataProvider.getSceneSampleData(sceneToken);
   egoPoseInfos = metaDataProvider.getEgoPoseInfo(sceneToken);
 
-  for (const auto& sampleData : sampleDatas) {
-    // cout << to_debug_string(sampleData) << endl;
-  }
   fileProgress.addToProcess(sampleDatas.size());
 }
 
@@ -106,12 +103,6 @@ SceneConverter::convertSampleDatas(rosbag::Bag& outBag,
       continue;
     }
     auto sampleType = sampleTypeOpt.value();
-
-    std::smatch m;
-    auto filenameString = sampleFilePath.filename().string();
-    auto matched = std::regex_search(filenameString, m, TOPIC_REGEX);
-    // std::string sensorName = toLower(m.str(1));
-    // assert(!sensorName.empty());
 
     CalibratedSensorInfo calibratedSensorInfo =
       metaDataProvider.getCalibratedSensorInfo(
