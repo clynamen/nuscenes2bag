@@ -7,6 +7,7 @@
 #include "nuscenes2bag/utils.hpp"
 
 #include <boost/asio.hpp>
+#include <boost/asio/thread_pool.hpp>
 
 #include <iostream>
 
@@ -83,3 +84,4 @@ NuScenes2Bag::convertDirectory(const std::filesystem::path& inDatasetPath,
 }
 
 }
+

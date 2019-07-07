@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(nuscenes2bag)
 
+find_package(Boost 1.69.0 REQUIRED)
+
 find_package(catkin
              REQUIRED
              rosbag
@@ -33,6 +35,7 @@ catkin_package(INCLUDE_DIRS
 include_directories(SYSTEM
                     thirdparty/json/
                     ${catkin_INCLUDE_DIRS}
+	            ${Boost_INCLUDE_DIRS}
                     ${OpenCV_INCLUDE_DIRS})
 include_directories(include)
 
