@@ -23,38 +23,47 @@ namespace nuscenes2bag {
 NuScenes2Bag::NuScenes2Bag() {}
 
 void
-NuScenes2Bag::convertDirectory(const std::filesystem::path& inDatasetPath,
+NuScenes2Bag::convertDirectory(const std::filesystem::path& inMetaPath,
+                               const std::filesystem::path& inDatasetPath,
                                const std::filesystem::path& outputRosbagPath,
-                               int threadNumber, std::optional<int32_t> sceneNumberOpt)
+                               int threadNumber,
+                               std::optional<int32_t> sceneNumberOpt)
 {
   if (threadNumber < 1) {
     std::cout << "Forcing at least one job number (-j1)" << std::endl;
     threadNumber = 1;
+  } else {
+    cout << "Using " << threadNumber << " threads" << endl;
   }
 
   MetaDataReader metaDataReader;
-  cout << "Loading metadata..." << endl;
-  metaDataReader.loadFromDirectory(inDatasetPath / "v1.0-mini");
+  cout << "Loading metadata from " << inMetaPath  << endl;
+  metaDataReader.loadFromDirectory(inMetaPath);
 
+  cout << "Creating threads " << endl;
   boost::asio::thread_pool pool(threadNumber);
   std::vector<std::unique_ptr<SceneConverter>> sceneConverters;
   FileProgress fileProgress;
 
+  cout << "Create out directory " << endl;
   fs::create_directories(outputRosbagPath);
 
   std::vector<Token> chosenSceneTokens;
 
-  if(sceneNumberOpt.has_value()) {
-    auto sceneInfoOpt = metaDataReader.getSceneInfoByNumber(sceneNumberOpt.value());
-    if(sceneInfoOpt.has_value()) {
+  if (sceneNumberOpt.has_value()) {
+    auto sceneInfoOpt =
+      metaDataReader.getSceneInfoByNumber(sceneNumberOpt.value());
+    if (sceneInfoOpt.has_value()) {
       chosenSceneTokens.push_back(sceneInfoOpt->token);
     } else {
-      std::cout << "Scene with ID=" << sceneNumberOpt.value() << " not found!" << std::endl;
+      std::cout << "Scene with ID=" << sceneNumberOpt.value() << " not found!"
+                << std::endl;
     }
   } else {
-    chosenSceneTokens = metaDataReader.getAllSceneTokens();;
+    chosenSceneTokens = metaDataReader.getAllSceneTokens();
+    ;
   }
-  
+
   for (const auto& sceneToken : chosenSceneTokens) {
     std::unique_ptr<SceneConverter> sceneConverter =
       std::make_unique<SceneConverter>(metaDataReader);

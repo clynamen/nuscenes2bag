@@ -3,8 +3,8 @@
   <name>nuscenes2bag</name>
   <version>0.0.1</version>
   <description>Convert nuscenes dataset to rosbag</description>
-
   <maintainer email="clynamen@gmail.com">clynamen</maintainer>
+
   <license>MIT</license>
   <author email="clynamen@gmail.com">clynamen</author>
   <build_depend>message_generation</build_depend>

@@ -9,6 +9,7 @@ int
 main(const int argc, const char* argv[])
 {
   try {
+    std::string metaDir;
     std::string sampleDir;
     std::string outputBagName;
     int32_t threadNumber;
@@ -20,6 +21,7 @@ main(const int argc, const char* argv[])
     options_description inputDesc{ "input" };
     inputDesc.add_options()(
       "scene_number,n", value<int32_t>(&sceneNumber), "only convert a given scene")(
+      "meta_dir,m", value<std::string>(&metaDir), "input metadata directory")(
       "sample_dir,s", value<std::string>(&sampleDir), "input directory")(
       "out,o", value<std::string>(&outputBagName), "output bag name")(
       "jobs,j",
@@ -43,7 +45,7 @@ main(const int argc, const char* argv[])
       if(sceneNumber >= 0) {
         sceneNumberOpt = sceneNumber;
       }
-      converter.convertDirectory(sampleDir, outputBagName, threadNumber, sceneNumberOpt);
+      converter.convertDirectory(metaDir, sampleDir, outputBagName, threadNumber, sceneNumberOpt);
     }
   } catch (const error& ex) {
     std::cerr << ex.what() << '\n';
