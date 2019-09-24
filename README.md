@@ -20,6 +20,23 @@ nuscenes2bag -s aptiv/v1.0_mini/ -o nuscenes_bags -j 2
 
 Bag files will be placed under the nuscenes_bags directory. With -j, it is possible to set the number of thread used. 
 
+
+## Examples:
+
+Convert one scene to a bag file, saved in a new directory.
+Scene '0001' will be saved to 'nuscenes_bags/1.bag'
+```
+rosrun nuscenes2bag nuscenes2bag --scene_number 0001 --sample_dir /path/to/dataset/ --out nuscenes_bags/
+```
+
+
+Convert the entire dataset to bag files.
+This processes 4 scenes simultaneously, however the scene numbers are not processed in numerical order.
+```
+rosrun nuscenes2bag nuscenes2bag --sample_dir /path/to/dataset/ --out nuscenes_bags/ --jobs 4
+```
+
+
 ## Status 
 
 Currently work in progress
