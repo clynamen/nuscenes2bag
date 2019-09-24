@@ -1,6 +1,10 @@
 
-cmake_minimum_required(VERSION 2.8.3)
+#cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.8) # C++17 support was added in CMake 3.8
+
 project(nuscenes2bag)
+
+set(CMAKE_CXX_STANDARD 17) # C++17 required for std::filesystem and std::optional
 
 find_package(Boost 1.69.0 REQUIRED)
 
