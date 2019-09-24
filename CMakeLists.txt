@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 2.8.3)
 project(nuscenes2bag)
 
@@ -39,6 +40,8 @@ include_directories(SYSTEM
                     ${OpenCV_INCLUDE_DIRS})
 include_directories(include)
 
+find_package(PCL REQUIRED COMPONENTS common io)
+
 set(SRCS
     src/EgoPoseConverter.cpp
     src/ImageDirectoryConverter.cpp
@@ -65,6 +68,8 @@ add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS}
 
 target_link_libraries(${PROJECT_NAME}
                       ${OpenCV_LIBRARIES}
+                      ${PCL_COMMON_LIBRARY}
+                      ${PCL_IO_LIBRARY}
                       ${catkin_LIBRARIES})
 
 install(DIRECTORY include/${PROJECT_NAME}/ thirdparty/json/
