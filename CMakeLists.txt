@@ -65,8 +65,7 @@ add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS}
 
 target_link_libraries(${PROJECT_NAME}
                       ${OpenCV_LIBRARIES}
-                      ${catkin_LIBRARIES}
-                      stdc++fs)
+                      ${catkin_LIBRARIES})
 
 install(DIRECTORY include/${PROJECT_NAME}/ thirdparty/json/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
