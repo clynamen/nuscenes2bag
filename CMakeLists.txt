@@ -54,7 +54,7 @@ set(SRCS
 add_executable(${PROJECT_NAME} ${SRCS} src/main.cpp)
 
 target_compile_options(${PROJECT_NAME}
-                       PRIVATE -std=c++2a
+                       PRIVATE
                                -Wall
                                -Wextra
                                -pedantic
