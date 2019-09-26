@@ -8,20 +8,16 @@ Probably the original dataset is also collected by Aptiv using ROS, so most data
 
 ![](images/ros_preview.png)
 
-## Usage
+## Install
+
+The `master` branch should compile on Ubuntu 19.04. It requires C++17 and Boost 1.66.
+The `ubuntu_1604` branch uses C++11 and has been tested on Ubuntu 16.04.
+The `ubuntu_1804` branch has been tested on Ubuntu 18.04.
 
 The tool is a normal ROS package. Place it under a workspace and build it with catkin.
 
-You can then use the converter:
 
-```
-nuscenes2bag -s aptiv/v1.0_mini/ -o nuscenes_bags -j 2
-```
-
-Bag files will be placed under the nuscenes_bags directory. With -j, it is possible to set the number of thread used. 
-
-
-## Examples:
+## Usage
 
 Convert one scene to a bag file, saved in a new directory.
 Scene '0001' will be saved to 'nuscenes_bags/1.bag'
