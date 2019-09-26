@@ -10,9 +10,9 @@ Probably the original dataset is also collected by Aptiv using ROS, so most data
 
 ## Install
 
-The `master` branch should compile on Ubuntu 19.04. It requires C++17 and Boost 1.66.
-The `ubuntu_1604` branch uses C++11 and has been tested on Ubuntu 16.04.
-The `ubuntu_1804` branch has been tested on Ubuntu 18.04.
+The `master` branch should compile on Ubuntu 19.04. It requires C++17 and Boost 1.66.  
+The `ubuntu_1604` branch uses C++11 and has been tested on Ubuntu 16.04.  
+The `ubuntu_1804` branch has been tested on Ubuntu 18.04.  
 
 The tool is a normal ROS package. Place it under a workspace and build it with catkin.
 
