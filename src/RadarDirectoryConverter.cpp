@@ -8,8 +8,11 @@ using namespace nuscenes2bag;
 
 namespace nuscenes2bag {
 
-std::optional<RadarObjects>
-readRadarFile(const std::filesystem::path& filePath)
+#if CMAKE_CXX_STANDARD >= 17
+std::optional<RadarObjects> readRadarFile(const fs::path& filePath)
+#else
+RadarObjectsPtr readRadarFile(const fs::path& filePath)
+#endif
 {
   const auto fileName = filePath.string();
   pcl::PointCloud<PclRadarObject>::Ptr cloud(
@@ -22,7 +25,14 @@ readRadarFile(const std::filesystem::path& filePath)
     error += fileName;
     cout << error << endl;
     // PCL_ERROR(error);
+
+#if CMAKE_CXX_STANDARD >= 17
     return std::nullopt;
+#else
+    RadarObjectsPtr empty_objects;
+    return empty_objects;
+#endif
+
   }
 
   RadarObjects radarObjects;
@@ -49,7 +59,12 @@ readRadarFile(const std::filesystem::path& filePath)
     radarObjects.objects.push_back(obj);
   }
 
+#if CMAKE_CXX_STANDARD >= 17
   return std::optional(radarObjects);
+#else
+  return boost::make_shared<RadarObjects>(radarObjects);
+#endif
+
 }
 
 }

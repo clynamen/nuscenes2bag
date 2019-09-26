@@ -1,4 +1,4 @@
-#include "nuscenes2bag/LidarDirectoryConverter.hpp"
+#include "nuscenes2bag/LidarDirectoryConverterXYZIR.hpp"
 #include "nuscenes2bag/utils.hpp"
 #include <exception>
 
@@ -7,7 +7,7 @@ using namespace std;
 
 namespace nuscenes2bag {
 
-inline void fillFieldsForPointcloud(std::vector<PointField>& fields) {
+inline void fillFieldsForPointcloudXYZIR(std::vector<PointField>& fields) {
     PointField field;
     field.datatype = sensor_msgs::PointField::FLOAT32;
     field.offset = 0;
@@ -27,10 +27,18 @@ inline void fillFieldsForPointcloud(std::vector<PointField>& fields) {
     field.name = std::string("z");
     fields.push_back(field);
 
+    // This field only contains positive integers but it's encoded as a float (4 bytes)
     field.datatype = sensor_msgs::PointField::FLOAT32;
     field.offset = 12;
     field.count = 1;
     field.name = std::string("intensity");
+    fields.push_back(field);
+
+    // This field only contains positive integers but it's encoded as a float (4 bytes)
+    field.datatype = sensor_msgs::PointField::FLOAT32;
+    field.offset = 16;
+    field.count = 1;
+    field.name = std::string("ring");
     fields.push_back(field);
 }
 
@@ -40,16 +48,7 @@ union {
     uint8_t byte[4];
 } floatToBytes;
 
-inline void push_back_float32(std::vector<uint8_t>& data, float float_data) {
-
-  /*
-  // dereferencing type-punned pointer will break strict-aliasing rules
-  data.push_back((*reinterpret_cast<uint32_t*>(&float_data) >> 0) & 0xFF);
-  data.push_back((*reinterpret_cast<uint32_t*>(&float_data) >> 8) & 0xFF);
-  data.push_back((*reinterpret_cast<uint32_t*>(&float_data) >> 16) & 0xFF);
-  data.push_back((*reinterpret_cast<uint32_t*>(&float_data) >> 24) & 0xFF);
-  */
-
+inline void push_back_float32_XYZIR(std::vector<uint8_t>& data, float float_data) {
   floatToBytes.value = float_data;
   data.push_back(floatToBytes.byte[0]);
   data.push_back(floatToBytes.byte[1]);
@@ -57,52 +56,45 @@ inline void push_back_float32(std::vector<uint8_t>& data, float float_data) {
   data.push_back(floatToBytes.byte[3]);
 }
 
-inline std::vector<float> readBinaryPcdFile(std::ifstream& fin) {
+inline std::vector<float> readBinaryPcdFileXYZIR(std::ifstream& fin) {
   std::vector<float> fileValues;
-  uint8_t skipCounter = 0;
   float f;
   while (fin.read(reinterpret_cast<char*>(&f), sizeof(float))) {
-    // skip 5th value of each point
-    if (skipCounter < 4) {
       fileValues.push_back(f);
-      skipCounter++;
-    } else {
-      skipCounter = 0;
-    }
   }
 
   return fileValues;
 }
 
 #if CMAKE_CXX_STANDARD >= 17
-std::optional<sensor_msgs::PointCloud2> readLidarFile(const fs::path& filePath)
+std::optional<sensor_msgs::PointCloud2> readLidarFileXYZIR(const fs::path& filePath)
 #else
-sensor_msgs::PointCloud2Ptr readLidarFile(const fs::path& filePath)
+sensor_msgs::PointCloud2Ptr readLidarFileXYZIR(const fs::path& filePath)
 #endif
 {
 
   PointCloud2 cloud;
   cloud.header.frame_id = std::string("lidar");
   cloud.is_bigendian = false;
-  cloud.point_step = sizeof(float) * 4; // Length of each point in bytes
+  cloud.point_step = sizeof(float) * 5; // Length of each point in bytes
   cloud.height = 1;
 
   try {
     std::ifstream fin(filePath.string(), std::ios::binary);
-    const std::vector<float> fileValues = readBinaryPcdFile(fin);
+    const std::vector<float> fileValues = readBinaryPcdFileXYZIR(fin);
 
-    if(fileValues.size() % 4 != 0) {
+    if(fileValues.size() % 5 != 0) {
       throw UnableToParseFileException(filePath.string());
     }
-    const size_t pointsNumber = fileValues.size() / 4;
+    const size_t pointsNumber = fileValues.size() / 5;
     cloud.width = pointsNumber;
 
     std::vector<uint8_t> data;
     for (auto float_data : fileValues) {
-      push_back_float32(data, float_data);
+      push_back_float32_XYZIR(data, float_data);
     }
 
-    fillFieldsForPointcloud(cloud.fields);
+    fillFieldsForPointcloudXYZIR(cloud.fields);
     cloud.data = data;
     cloud.row_step = data.size(); // Length of row in bytes
 

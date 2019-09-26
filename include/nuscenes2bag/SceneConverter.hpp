@@ -1,6 +1,12 @@
 #pragma once
 
+#if CMAKE_CXX_STANDARD >= 17
 #include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+#endif
 
 #include "nuscenes2bag/MetaDataReader.hpp"
 #include "nuscenes2bag/FileProgress.hpp"
@@ -13,10 +19,11 @@ class SceneConverter {
     SceneConverter(const MetaDataProvider& metaDataProvider);
 
     void submit(const Token& sceneToken, FileProgress& fileProgress);
-    void run(const std::filesystem::path& inPath, const std::filesystem::path& outDirectoryPath, FileProgress& fileProgress);
+
+    void run(const fs::path& inPath, const fs::path& outDirectoryPath, FileProgress& fileProgress);
 
     private:
-    void convertSampleDatas(rosbag::Bag& outBag, const std::filesystem::path &inPath, FileProgress& fileProgress);
+    void convertSampleDatas(rosbag::Bag& outBag, const fs::path &inPath, FileProgress& fileProgress);
     void convertEgoPoseInfos(rosbag::Bag& outBag, const std::vector<CalibratedSensorInfoAndName>& calibratedSensorInfo);
     
     private:

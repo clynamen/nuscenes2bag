@@ -1,6 +1,7 @@
 #include "nuscenes2bag/MetaDataReader.hpp"
 #include "nuscenes2bag/NuScenes2Bag.hpp"
 #include <boost/program_options.hpp>
+#include <iostream>
 
 using namespace boost::program_options;
 using namespace nuscenes2bag;
@@ -11,7 +12,7 @@ main(const int argc, const char* argv[])
   try {
     std::string sampleDir;
     std::string outputBagName;
-    int32_t threadNumber;
+    int32_t threadNumber = -1;
     int32_t sceneNumber = -1;
 
     options_description desc{ "Options" };
@@ -37,13 +38,18 @@ main(const int argc, const char* argv[])
     } else {
       NuScenes2Bag converter{};
 
-      std::filesystem::path sampleDirPath(sampleDir);
+      fs::path sampleDirPath(sampleDir);
 
+#if CMAKE_CXX_STANDARD >= 17
       std::optional<int32_t> sceneNumberOpt;
-      if(sceneNumber >= 0) {
+      if(sceneNumber > 0) {
         sceneNumberOpt = sceneNumber;
       }
       converter.convertDirectory(sampleDir, outputBagName, threadNumber, sceneNumberOpt);
+#else
+      converter.convertDirectory(sampleDir, outputBagName, threadNumber, sceneNumber);
+#endif
+
     }
   } catch (const error& ex) {
     std::cerr << ex.what() << '\n';

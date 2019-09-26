@@ -1,7 +1,14 @@
-#include <filesystem>
 #include <iostream>
 #include <map>
 #include <set>
+
+#if CMAKE_CXX_STANDARD >= 17
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+#endif
 
 #include <nlohmann/json.hpp>
 
@@ -26,11 +33,17 @@ public:
 
 class MetaDataReader : public MetaDataProvider {
 public:
-  void loadFromDirectory(const std::filesystem::path &directoryPath);
+  void loadFromDirectory(const fs::path &directoryPath);
 
 
   std::vector<Token> getAllSceneTokens() const override;
+
+#if CMAKE_CXX_STANDARD >= 17
   std::optional<SceneInfo> getSceneInfo(const Token &sceneToken) const override;
+#else
+  boost::shared_ptr<SceneInfo> getSceneInfo(const Token &sceneToken) const override;
+#endif
+
   std::vector<SampleDataInfo>
   getSceneSampleData(const Token &sceneToken) const override;
   std::vector<EgoPoseInfo>
@@ -41,24 +54,29 @@ public:
   getSceneCalibratedSensorInfo(const Token &sceneToken) const override;
   CalibratedSensorName
   getSensorName(const Token &sensorToken) const override;
+
+#if CMAKE_CXX_STANDARD >= 17
   std::optional<SceneInfo>
   getSceneInfoByNumber(const uint32_t sceneNumber) const override;
+#else
+  boost::shared_ptr<SceneInfo> getSceneInfoByNumber(const uint32_t sceneNumber) const override;
+#endif
 
 private:
-  static nlohmann::json slurpJsonFile(const std::filesystem::path &filePath);
+  static nlohmann::json slurpJsonFile(const fs::path &filePath);
   static std::vector<SceneInfo>
-  loadScenesFromFile(const std::filesystem::path &filePath);
+  loadScenesFromFile(const fs::path &filePath);
   static std::map<Token, std::vector<SampleInfo>>
-  loadSampleInfos(const std::filesystem::path &filePath);
+  loadSampleInfos(const fs::path &filePath);
   static std::map<Token, std::vector<SampleDataInfo>>
-  loadSampleDataInfos(const std::filesystem::path &filePath);
+  loadSampleDataInfos(const fs::path &filePath);
   static std::map<Token, std::vector<EgoPoseInfo>> loadEgoPoseInfos(
-      const std::filesystem::path &filePath,
+      const fs::path &filePath,
       std::map<Token, Token> sample2SampleData);
   static std::map<Token, CalibratedSensorInfo>
-  loadCalibratedSensorInfo(const std::filesystem::path &filePath);
+  loadCalibratedSensorInfo(const fs::path &filePath);
   static std::map<Token, CalibratedSensorName>
-  loadCalibratedSensorNames(const std::filesystem::path &filePath);
+  loadCalibratedSensorNames(const fs::path &filePath);
 
   std::vector<SceneInfo> scenes;
   std::map<Token, std::vector<SampleInfo>> scene2Samples;
