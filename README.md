@@ -19,17 +19,32 @@ The tool is a normal ROS package. Place it under a workspace and build it with c
 
 ## Usage
 
-Convert one scene to a bag file, saved in a new directory.
-Scene '0001' will be saved to 'nuscenes_bags/1.bag'
-```
-rosrun nuscenes2bag nuscenes2bag --scene_number 0001 --sample_dir /path/to/dataset/ --out nuscenes_bags/
-```
+**Command-line arguments:**  
+`--dataroot`: The path to the directory that contains the 'maps', 'samples' and 'sweeps'.  
+`--version`: (optional) The sub-directory that contains the metadata .json files. Default = "v1.0-mini"  
 
 
-Convert the entire dataset to bag files.
+**Converting the 'mini' dataset:**  
+
+Convert one scene to a bag file, saved in a new directory:  
+Scene '0061' will be saved to 'nuscenes_bags/61.bag'
+```
+rosrun nuscenes2bag nuscenes2bag --scene_number 0061 --sample_dir /path/to/nuscenes_mini_meta_v1.0/ --out nuscenes_bags/
+``` 
+
+
+Convert the entire dataset to bag files:  
 This processes 4 scenes simultaneously, however the scene numbers are not processed in numerical order.
 ```
-rosrun nuscenes2bag nuscenes2bag --sample_dir /path/to/dataset/ --out nuscenes_bags/ --jobs 4
+rosrun nuscenes2bag nuscenes2bag --sample_dir /path/to/nuscenes_mini_meta_v1.0/ --out nuscenes_bags/ --jobs 4
+```
+
+
+**Converting other datasets:**  
+
+Convert a dataset with the metadata in a sub-directory called 'v2.0':  
+```
+rosrun nuscenes2bag nuscenes2bag --sample_dir /path/to/nuscenes_data_v2.0/ --version v2.0 --out nuscenes_bags/ --jobs 4
 ```
 
 
