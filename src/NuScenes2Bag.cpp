@@ -35,6 +35,7 @@ NuScenes2Bag::NuScenes2Bag() {}
 
 void
 NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
+                               const std::string& version,
                                const fs::path& outputRosbagPath,
                                int threadNumber,
 #if CMAKE_CXX_STANDARD >= 17
@@ -50,11 +51,14 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
   }
 
   MetaDataReader metaDataReader;
-  cout << "Loading metadata..." << endl;
+
+  fs::path metadataPath = inDatasetPath;
+  metadataPath /= fs::path(version); // Append sub-directory
+  std::cout << "Loading metadata from " + metadataPath.string() + " ..." << std::endl;
 
   try {
     // If file is not found, a runtime_error is thrown
-  metaDataReader.loadFromDirectory(inDatasetPath);
+  metaDataReader.loadFromDirectory(metadataPath);
   } catch (const runtime_error& e) {
       std::cerr << "Error: " << e.what() << '\n';
       std::exit(-1);
