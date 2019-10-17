@@ -110,8 +110,9 @@ SceneConverter::submit(const Token& sceneToken, FileProgress& fileProgress)
   assert(sceneInfoOpt.has_value());
   SceneInfo& sceneInfo = sceneInfoOpt.value();
 #else
-  SceneInfo& sceneInfo = *metaDataProvider.getSceneInfo(sceneToken);
-  assert(sceneInfo != nullptr);
+  boost::shared_ptr<SceneInfo> sceneInfoPtr = metaDataProvider.getSceneInfo(sceneToken);
+  assert(sceneInfoPtr != nullptr);
+  SceneInfo& sceneInfo = *sceneInfoPtr;
 #endif
 
   sceneId = sceneInfo.sceneId;
