@@ -69,12 +69,14 @@ SampleType getSampleType(const std::string &filename)
 template<typename T>
 void
 writeMsg(const std::string_view topicName,
+         const std::string &frameID,
          const TimeStamp timeStamp,
          rosbag::Bag& outBag,
          std::optional<T> msgOpt)
 {
   if (msgOpt.has_value()) {
     auto& msg = msgOpt.value();
+    msg.header.frame_id = frameID;
     msg.header.stamp = stampUs2RosTime(timeStamp);
     outBag.write(std::string(topicName).c_str(), msg.header.stamp, msg);
   }
@@ -83,11 +85,13 @@ writeMsg(const std::string_view topicName,
 #else
 
 template<typename T> void writeMsg(const std::string &topicName,
+                                   const std::string &frameID,
                                    const TimeStamp timeStamp,
                                    rosbag::Bag& outBag,
                                    T msg)
 {
   if (msg) {
+    msg->header.frame_id = frameID;
     msg->header.stamp = stampUs2RosTime(timeStamp);
     outBag.write(std::string(topicName).c_str(), msg->header.stamp, msg);
   }
@@ -170,8 +174,8 @@ SceneConverter::convertSampleDatas(rosbag::Bag& outBag,
     if (sampleType == SampleType::CAMERA) {
       auto topicName = sensorName + "/raw";
       auto msg = readImageFile(sampleFilePath);
-      msg->header.frame_id = sensorName;
-      writeMsg(topicName, sampleData.timeStamp, outBag, msg);
+      writeMsg(topicName, sensorName, sampleData.timeStamp, outBag, msg);
+
     } else if (sampleType == SampleType::LIDAR) {
       auto topicName = sensorName;
 
@@ -179,13 +183,13 @@ SceneConverter::convertSampleDatas(rosbag::Bag& outBag,
       auto msg = readLidarFile(sampleFilePath); // x,y,z,intensity
       //auto msg = readLidarFileXYZIR(sampleFilePath); // x,y,z,intensity,ring
 
-      msg->header.frame_id = sensorName;
-      writeMsg(topicName, sampleData.timeStamp, outBag, msg);
+      writeMsg(topicName, sensorName, sampleData.timeStamp, outBag, msg);
+
     } else if (sampleType == SampleType::RADAR) {
       auto topicName = sensorName;
       auto msg = readRadarFile(sampleFilePath);
-      msg->header.frame_id = sensorName;
-      writeMsg(topicName, sampleData.timeStamp, outBag, msg);
+      writeMsg(topicName, sensorName, sampleData.timeStamp, outBag, msg);
+
     } else {
       cout << "Unknown sample type" << endl;
     }
