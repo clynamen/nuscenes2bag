@@ -29,14 +29,14 @@ The tool is a normal ROS package. Place it under a workspace and build it with c
 Convert one scene to a bag file, saved in a new directory:  
 Scene '0061' will be saved to 'nuscenes_bags/61.bag'
 ```
-rosrun nuscenes2bag nuscenes2bag --scene_number 0061 --sample_dir /path/to/nuscenes_mini_meta_v1.0/ --out nuscenes_bags/
+rosrun nuscenes2bag nuscenes2bag --scene_number 0061 --dataroot /path/to/nuscenes_mini_meta_v1.0/ --out nuscenes_bags/
 ``` 
 
 
 Convert the entire dataset to bag files:  
 This processes 4 scenes simultaneously, however the scene numbers are not processed in numerical order.
 ```
-rosrun nuscenes2bag nuscenes2bag --sample_dir /path/to/nuscenes_mini_meta_v1.0/ --out nuscenes_bags/ --jobs 4
+rosrun nuscenes2bag nuscenes2bag --dataroot /path/to/nuscenes_mini_meta_v1.0/ --out nuscenes_bags/ --jobs 4
 ```
 
 
@@ -44,7 +44,7 @@ rosrun nuscenes2bag nuscenes2bag --sample_dir /path/to/nuscenes_mini_meta_v1.0/ 
 
 Convert a dataset with the metadata in a sub-directory called 'v2.0':  
 ```
-rosrun nuscenes2bag nuscenes2bag --sample_dir /path/to/nuscenes_data_v2.0/ --version v2.0 --out nuscenes_bags/ --jobs 4
+rosrun nuscenes2bag nuscenes2bag --dataroot /path/to/nuscenes_data_v2.0/ --version v2.0 --out nuscenes_bags/ --jobs 4
 ```
 
 
