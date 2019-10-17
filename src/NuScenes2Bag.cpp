@@ -51,7 +51,14 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
 
   MetaDataReader metaDataReader;
   cout << "Loading metadata..." << endl;
+
+  try {
+    // If file is not found, a runtime_error is thrown
   metaDataReader.loadFromDirectory(inDatasetPath);
+  } catch (const runtime_error& e) {
+      std::cerr << "Error: " << e.what() << '\n';
+      std::exit(-1);
+  }
 
   cout << "Initializing " << threadNumber << " threads..." << endl;
 
