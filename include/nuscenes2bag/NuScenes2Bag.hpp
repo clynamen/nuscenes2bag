@@ -21,6 +21,7 @@ public:
   NuScenes2Bag();
 
   void convertDirectory(const fs::path &inDatasetPath,
+                        const std::string& version,
                         const fs::path &outputRosbagPath,
                         int32_t threadNumber,
 #if CMAKE_CXX_STANDARD >= 17
