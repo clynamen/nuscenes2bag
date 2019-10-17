@@ -141,15 +141,7 @@ SceneConverter::run(const fs::path& inPath,
 
   auto sensorInfos = metaDataProvider.getSceneCalibratedSensorInfo(sceneToken);
   convertEgoPoseInfos(outBag, sensorInfos);
-
-  try {
   convertSampleDatas(outBag, inPath, fileProgress);
-
-  } catch (const runtime_error& e) {
-    std::cout << "Caught fatal exception in SceneConverter::run()" << std::endl;
-    outBag.close();
-    std::exit(-1);
-  }
 
   outBag.close();
 }
