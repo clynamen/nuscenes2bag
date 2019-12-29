@@ -4,9 +4,14 @@
 
 #include "nuscenes2bag/DatasetTypes.hpp"
 
-#include <filesystem>
+#if CMAKE_CXX_STANDARD >= 17
 #include <optional>
-#include <vector>
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+#endif
 
 namespace nuscenes2bag {
 
@@ -15,9 +20,16 @@ struct NuScenes2Bag {
 public:
   NuScenes2Bag();
 
-  void convertDirectory(const std::filesystem::path &inDatasetPath,
-                        const std::filesystem::path &outputRosbagPath, 
-                        int32_t threadNumber, std::optional<int32_t> sceneNumberOpt);
+  void convertDirectory(const fs::path &inDatasetPath,
+                        const std::string& version,
+                        const fs::path &outputRosbagPath,
+                        int32_t threadNumber,
+#if CMAKE_CXX_STANDARD >= 17
+                        std::optional<int32_t> sceneNumberOpt
+#else
+                        int32_t sceneNumberOpt
+#endif
+                        );
 
 private:
   std::string inDatasetPathString;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <filesystem>
+#include <array>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -11,6 +11,7 @@ namespace nuscenes2bag {
 
 enum class SampleType
 {
+  NONE,
   CAMERA,
   RADAR,
   LIDAR

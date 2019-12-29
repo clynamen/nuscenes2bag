@@ -14,9 +14,9 @@ namespace fs = boost::filesystem;
 namespace nuscenes2bag {
 
 #if CMAKE_CXX_STANDARD >= 17
-std::optional<sensor_msgs::PointCloud2> readLidarFile(const fs::path& filePath);
+std::optional<sensor_msgs::PointCloud2> readLidarFileXYZIR(const fs::path& filePath);
 #else
-sensor_msgs::PointCloud2Ptr readLidarFile(const fs::path& filePath);
+sensor_msgs::PointCloud2Ptr readLidarFileXYZIR(const fs::path& filePath);
 #endif
 
 }

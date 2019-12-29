@@ -1,7 +1,18 @@
-cmake_minimum_required(VERSION 2.8.3)
+
+#cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.8) # C++17 support was added in CMake 3.8
+
 project(nuscenes2bag)
 
-find_package(Boost 1.69.0 REQUIRED)
+#set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17) # C++17 required for std::filesystem and std::optional
+
+set(CMAKE_BUILD_TYPE Release) # Debug, Release, RelWithDebInfo
+
+#find_package(Boost 1.58.0 COMPONENTS filesystem thread REQUIRED) # Ubuntu 16.04
+#find_package(Boost 1.65.0 COMPONENTS filesystem thread REQUIRED) # Ubuntu 18.04
+find_package(Boost 1.66.0 COMPONENTS filesystem thread REQUIRED) # boost::asio::thread_pool
 
 find_package(catkin
              REQUIRED
@@ -35,14 +46,17 @@ catkin_package(INCLUDE_DIRS
 include_directories(SYSTEM
                     thirdparty/json/
                     ${catkin_INCLUDE_DIRS}
-	            ${Boost_INCLUDE_DIRS}
+                    ${Boost_INCLUDE_DIRS}
                     ${OpenCV_INCLUDE_DIRS})
 include_directories(include)
+
+find_package(PCL REQUIRED COMPONENTS common io)
 
 set(SRCS
     src/EgoPoseConverter.cpp
     src/ImageDirectoryConverter.cpp
     src/LidarDirectoryConverter.cpp
+    src/LidarDirectoryConverterXYZIR.cpp
     src/RadarDirectoryConverter.cpp
     src/NuScenes2Bag.cpp
     src/FileProgress.cpp
@@ -54,7 +68,7 @@ set(SRCS
 add_executable(${PROJECT_NAME} ${SRCS} src/main.cpp)
 
 target_compile_options(${PROJECT_NAME}
-                       PRIVATE -std=c++2a
+                       PRIVATE
                                -Wall
                                -Wextra
                                -pedantic
@@ -65,8 +79,9 @@ add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS}
 
 target_link_libraries(${PROJECT_NAME}
                       ${OpenCV_LIBRARIES}
-                      ${catkin_LIBRARIES}
-                      stdc++fs)
+                      ${PCL_COMMON_LIBRARY}
+                      ${PCL_IO_LIBRARY}
+                      ${catkin_LIBRARIES})
 
 install(DIRECTORY include/${PROJECT_NAME}/ thirdparty/json/
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}

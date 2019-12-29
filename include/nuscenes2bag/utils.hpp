@@ -3,18 +3,34 @@
 #include "nuscenes2bag/DatasetTypes.hpp"
 
 #include "ros/ros.h"
+#include <algorithm>
 #include <string>
 #include <iostream>
 #include <exception>
+
+#if CMAKE_CXX_STANDARD >= 17
+#include <string_view>
+#endif
 
 #define PRINT_EXCEPTION(e) std::cout << "[ERROR] Exception thrown: " << __FILE__ << ":" << __LINE__ << " " << e.what() << std::endl;
 
 namespace nuscenes2bag {
 
+#if CMAKE_CXX_STANDARD >= 17
+
 std::string toLower(const std::string_view &str);
 
 bool string_icontains(const std::string_view &string,
                       const std::string_view &sub);
+
+#else
+
+std::string toLower(const std::string &str);
+
+bool string_icontains(const std::string &string,
+                      const std::string &sub);
+
+#endif
 
 ros::Time stampUs2RosTime(uint64_t stampUs);
 

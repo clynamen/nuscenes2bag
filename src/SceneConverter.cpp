@@ -5,6 +5,7 @@
 #include "nuscenes2bag/EgoPoseConverter.hpp"
 #include "nuscenes2bag/ImageDirectoryConverter.hpp"
 #include "nuscenes2bag/LidarDirectoryConverter.hpp"
+#include "nuscenes2bag/LidarDirectoryConverterXYZIR.hpp"
 #include "nuscenes2bag/RadarDirectoryConverter.hpp"
 
 #include <array>
@@ -19,6 +20,9 @@ namespace nuscenes2bag {
 SceneConverter::SceneConverter(const MetaDataProvider& metaDataProvider)
   : metaDataProvider(metaDataProvider)
 {}
+
+
+#if CMAKE_CXX_STANDARD >= 17
 
 std::optional<SampleType>
 getSampleType(const std::string_view filename)
@@ -37,25 +41,71 @@ getSampleType(const std::string_view filename)
   return std::nullopt;
 }
 
+#else
+
+SampleType getSampleType(const std::string &filename)
+{
+  std::array<std::pair<const char*, SampleType>, 3> pairs = {
+    { { "CAM", SampleType::CAMERA },
+      { "RADAR", SampleType::RADAR },
+      { "LIDAR", SampleType::LIDAR } }
+  };
+  for (const auto& keyvalue : pairs) {
+    const char* str = keyvalue.first;
+    const SampleType& type = keyvalue.second;
+    if (filename.find(str) != string::npos) {
+      return type;
+    }
+  }
+  cout << "Unknown file " << filename << endl;
+
+  return SampleType::NONE;
+}
+
+#endif
+
+#if CMAKE_CXX_STANDARD >= 17
+
 template<typename T>
 void
 writeMsg(const std::string_view topicName,
+         const std::string &frameID,
          const TimeStamp timeStamp,
          rosbag::Bag& outBag,
          std::optional<T> msgOpt)
 {
   if (msgOpt.has_value()) {
     auto& msg = msgOpt.value();
+    msg.header.frame_id = frameID;
     msg.header.stamp = stampUs2RosTime(timeStamp);
     outBag.write(std::string(topicName).c_str(), msg.header.stamp, msg);
   }
 }
+
+#else
+
+template<typename T> void writeMsg(const std::string &topicName,
+                                   const std::string &frameID,
+                                   const TimeStamp timeStamp,
+                                   rosbag::Bag& outBag,
+                                   T msg)
+{
+  if (msg) {
+    msg->header.frame_id = frameID;
+    msg->header.stamp = stampUs2RosTime(timeStamp);
+    outBag.write(std::string(topicName).c_str(), msg->header.stamp, msg);
+  }
+}
+
+#endif
 
 static const std::regex TOPIC_REGEX = std::regex(".*__([A-Z_]+)__.*");
 
 void
 SceneConverter::submit(const Token& sceneToken, FileProgress& fileProgress)
 {
+
+#if CMAKE_CXX_STANDARD >= 17
   std::optional sceneInfoOpt = metaDataProvider.getSceneInfo(sceneToken);
   // if(!sceneInfoOpt.has_value()) {
   //     // cout << "SceneInfo for " << sceneToken << " not found!" << endl;
@@ -63,6 +113,11 @@ SceneConverter::submit(const Token& sceneToken, FileProgress& fileProgress)
   // }
   assert(sceneInfoOpt.has_value());
   SceneInfo& sceneInfo = sceneInfoOpt.value();
+#else
+  boost::shared_ptr<SceneInfo> sceneInfoPtr = metaDataProvider.getSceneInfo(sceneToken);
+  assert(sceneInfoPtr != nullptr);
+  SceneInfo& sceneInfo = *sceneInfoPtr;
+#endif
 
   sceneId = sceneInfo.sceneId;
   this->sceneToken = sceneToken;
@@ -73,8 +128,8 @@ SceneConverter::submit(const Token& sceneToken, FileProgress& fileProgress)
 }
 
 void
-SceneConverter::run(const std::filesystem::path& inPath,
-                    const std::filesystem::path& outDirectoryPath,
+SceneConverter::run(const fs::path& inPath,
+                    const fs::path& outDirectoryPath,
                     FileProgress& fileProgress)
 {
 
@@ -93,16 +148,21 @@ SceneConverter::run(const std::filesystem::path& inPath,
 
 void
 SceneConverter::convertSampleDatas(rosbag::Bag& outBag,
-                                   const std::filesystem::path& inPath,
+                                   const fs::path& inPath,
                                    FileProgress& fileProgress)
 {
   for (const auto& sampleData : sampleDatas) {
-    std::filesystem::path sampleFilePath = inPath / sampleData.fileName;
-    auto sampleTypeOpt = getSampleType(sampleFilePath.string());
+    fs::path sampleFilePath = inPath / sampleData.fileName;
+
+#if CMAKE_CXX_STANDARD >= 17
+    std::optional<SampleType> sampleTypeOpt = getSampleType(sampleFilePath.string());
     if (!sampleTypeOpt.has_value()) {
       continue;
     }
-    auto sampleType = sampleTypeOpt.value();
+    SampleType& sampleType = sampleTypeOpt.value();
+#else
+    SampleType sampleType = getSampleType(sampleFilePath.string());
+#endif
 
     CalibratedSensorInfo calibratedSensorInfo =
       metaDataProvider.getCalibratedSensorInfo(
@@ -114,18 +174,22 @@ SceneConverter::convertSampleDatas(rosbag::Bag& outBag,
     if (sampleType == SampleType::CAMERA) {
       auto topicName = sensorName + "/raw";
       auto msg = readImageFile(sampleFilePath);
-      msg->header.frame_id = sensorName;
-      writeMsg(topicName, sampleData.timeStamp, outBag, msg);
+      writeMsg(topicName, sensorName, sampleData.timeStamp, outBag, msg);
+
     } else if (sampleType == SampleType::LIDAR) {
       auto topicName = sensorName;
-      auto msg = readLidarFile(sampleFilePath);
-      msg->header.frame_id = sensorName;
-      writeMsg(topicName, sampleData.timeStamp, outBag, msg);
+
+      // PointCloud format:
+      auto msg = readLidarFile(sampleFilePath); // x,y,z,intensity
+      //auto msg = readLidarFileXYZIR(sampleFilePath); // x,y,z,intensity,ring
+
+      writeMsg(topicName, sensorName, sampleData.timeStamp, outBag, msg);
+
     } else if (sampleType == SampleType::RADAR) {
       auto topicName = sensorName;
       auto msg = readRadarFile(sampleFilePath);
-      msg->header.frame_id = sensorName;
-      writeMsg(topicName, sampleData.timeStamp, outBag, msg);
+      writeMsg(topicName, sensorName, sampleData.timeStamp, outBag, msg);
+
     } else {
       cout << "Unknown sample type" << endl;
     }
