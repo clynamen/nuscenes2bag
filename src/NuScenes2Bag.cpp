@@ -13,6 +13,8 @@
 #include <boost/make_shared.hpp>
 #endif
 
+#include <boost/asio.hpp>
+
 #if BOOST_VERSION >= 106600
 // thread_pool was added in Boost 1.66.0
 #include <boost/asio/thread_pool.hpp>

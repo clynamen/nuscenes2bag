@@ -1,18 +1,17 @@
 
-#cmake_minimum_required(VERSION 2.8.3)
 cmake_minimum_required(VERSION 3.8) # C++17 support was added in CMake 3.8
 
 project(nuscenes2bag)
 
 #set(CMAKE_CXX_STANDARD 11)
-#set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD 17) # C++17 required for std::filesystem and std::optional
+set(CMAKE_CXX_STANDARD 14)
+#set(CMAKE_CXX_STANDARD 17) # C++17 required for std::filesystem and std::optional
 
 set(CMAKE_BUILD_TYPE Release) # Debug, Release, RelWithDebInfo
 
 #find_package(Boost 1.58.0 COMPONENTS filesystem thread REQUIRED) # Ubuntu 16.04
-#find_package(Boost 1.65.0 COMPONENTS filesystem thread REQUIRED) # Ubuntu 18.04
-find_package(Boost 1.66.0 COMPONENTS filesystem thread REQUIRED) # boost::asio::thread_pool
+find_package(Boost 1.65.0 COMPONENTS filesystem thread REQUIRED) # Ubuntu 18.04
+#find_package(Boost 1.66.0 COMPONENTS filesystem thread REQUIRED) # boost::asio::thread_pool
 
 find_package(catkin
              REQUIRED
@@ -73,6 +72,8 @@ target_compile_options(${PROJECT_NAME}
                                -Wextra
                                -pedantic
                                )
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS}
                  ${catkin_EXPORTED_TARGETS})

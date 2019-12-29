@@ -1,5 +1,7 @@
 # nuScenes2Bag
 
+![](https://github.com/clynamen/nuscenes2bag/workflows/ROS%20CI/badge.svg)
+
 Simple C++ tool for converting the [nuScenes](https://www.nuscenes.org/) dataset from [Aptiv](https://www.aptiv.com).
 
 The tool loads the json metadata and then the sample files for each scene. The sample are converted in a suitable ROS msg and written to a bag. TF tree is also written.
@@ -67,3 +69,9 @@ Create an Github issue for suggestion, bug and requests.
 Built using:
 
  - https://github.com/nlohmann/json
+ - http://github.com/en4bz/ThreadPool
+
+## Authors
+
+[clynamen](https://github.com/clynamen/)
+[ChernoA](https://github.com/ChernoA)
