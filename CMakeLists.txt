@@ -74,6 +74,8 @@ target_compile_options(${PROJECT_NAME}
                                -pedantic
                                )
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
+
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS}
                  ${catkin_EXPORTED_TARGETS})
 
