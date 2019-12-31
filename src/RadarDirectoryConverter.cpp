@@ -8,7 +8,8 @@ using namespace nuscenes2bag;
 
 namespace nuscenes2bag {
 
-boost::optional<RadarObjects> readRadarFile(const fs::path& filePath)
+boost::optional<RadarObjects>
+readRadarFile(const fs::path& filePath)
 {
   const auto fileName = filePath.string();
   pcl::PointCloud<PclRadarObject>::Ptr cloud(
@@ -23,7 +24,6 @@ boost::optional<RadarObjects> readRadarFile(const fs::path& filePath)
     // PCL_ERROR(error);
 
     return boost::none;
-
   }
 
   RadarObjects radarObjects;
@@ -51,7 +51,6 @@ boost::optional<RadarObjects> readRadarFile(const fs::path& filePath)
   }
 
   return boost::optional<RadarObjects>(radarObjects);
-
 }
 
 }

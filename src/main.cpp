@@ -20,10 +20,15 @@ main(const int argc, const char* argv[])
     desc.add_options()("help,h", "show help");
 
     options_description inputDesc{ "input" };
-    inputDesc.add_options()(
-      "scene_number,n", value<int32_t>(&sceneNumber), "only convert a given scene")(
-      "dataroot,s", value<std::string>(&dataroot)->required(), "Path to root of dataset containing 'maps', 'samples', 'sweeps'")(
-      "version", value<std::string>(&version), "Version string (default = 'v1.0-mini')")(
+    inputDesc.add_options()("scene_number,n",
+                            value<int32_t>(&sceneNumber),
+                            "only convert a given scene")(
+      "dataroot,s",
+      value<std::string>(&dataroot)->required(),
+      "Path to root of dataset containing 'maps', 'samples', 'sweeps'")(
+      "version",
+      value<std::string>(&version),
+      "Version string (default = 'v1.0-mini')")(
       "out,o", value<std::string>(&outputBagName), "output bag name")(
       "jobs,j",
       value<int32_t>(&threadNumber),
@@ -43,11 +48,11 @@ main(const int argc, const char* argv[])
       fs::path sampleDirPath(dataroot);
 
       boost::optional<int32_t> sceneNumberOpt;
-      if(sceneNumber > 0) {
+      if (sceneNumber > 0) {
         sceneNumberOpt = sceneNumber;
       }
-      converter.convertDirectory(sampleDirPath, version, outputBagName, threadNumber, sceneNumberOpt);
-
+      converter.convertDirectory(
+        sampleDirPath, version, outputBagName, threadNumber, sceneNumberOpt);
     }
   } catch (const error& ex) {
     std::cerr << ex.what() << '\n';

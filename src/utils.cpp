@@ -4,18 +4,19 @@
 
 namespace nuscenes2bag {
 
-std::string toLower(const std::string& str)
+std::string
+toLower(const std::string& str)
 {
   std::string lowerStr(str);
-  std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(),
-    [](unsigned char c)
-  {
-    return std::tolower(c);
-  });
+  std::transform(lowerStr.begin(),
+                 lowerStr.end(),
+                 lowerStr.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
   return lowerStr;
 }
 
-bool string_icontains(const std::string& string, const std::string& sub)
+bool
+string_icontains(const std::string& string, const std::string& sub)
 {
   std::string lowerString = toLower(string);
   std::string lowerSub = toLower(sub);

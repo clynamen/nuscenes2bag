@@ -235,7 +235,8 @@ MetaDataReader::loadCalibratedSensorInfo(const fs::path& filePath)
       boost::none
     };
 
-    boost::optional<json::json> sensor_intrinsics = calibratedSensorJson["rotation"];
+    boost::optional<json::json> sensor_intrinsics =
+      calibratedSensorJson["rotation"];
 
     calibratedSensorToken2CalibratedSensorInfo.emplace(token,
                                                        calibratedSensorInfo);
@@ -273,7 +274,8 @@ MetaDataReader::getAllSceneTokens() const
   return tokens;
 }
 
-boost::optional<SceneInfo> MetaDataReader::getSceneInfo(const Token& sceneToken) const
+boost::optional<SceneInfo>
+MetaDataReader::getSceneInfo(const Token& sceneToken) const
 {
   assert(loadFromDirectoryCalled);
   auto it = std::find_if(
@@ -286,7 +288,6 @@ boost::optional<SceneInfo> MetaDataReader::getSceneInfo(const Token& sceneToken)
   }
 
   return boost::optional<SceneInfo>(*it);
-
 }
 
 std::vector<SampleDataInfo>
@@ -294,10 +295,12 @@ MetaDataReader::getSceneSampleData(const Token& sceneToken) const
 {
   std::vector<SampleDataInfo> sampleDataInfos;
 
-  const auto& sceneSamples = findOrThrow(scene2Samples, sceneToken, " sample for scene token");
+  const auto& sceneSamples =
+    findOrThrow(scene2Samples, sceneToken, " sample for scene token");
   for (const auto& sceneSample : sceneSamples) {
     const Token& sceneSampleToken = sceneSample.token;
-    const auto& sceneSampleDatas = findOrThrow(sample2SampleData, sceneSampleToken, " sample data for sample token");
+    const auto& sceneSampleDatas = findOrThrow(
+      sample2SampleData, sceneSampleToken, " sample data for sample token");
 
     for (const SampleDataInfo& sampleData : sceneSampleDatas) {
       sampleDataInfos.push_back(sampleData);
@@ -317,14 +320,17 @@ CalibratedSensorInfo
 MetaDataReader::getCalibratedSensorInfo(
   const Token& calibratedSensorToken) const
 {
-  return findOrThrow(calibratedSensorToken2CalibratedSensorInfo, calibratedSensorToken, 
-  "calibrated sensor info by sensor token");
+  return findOrThrow(calibratedSensorToken2CalibratedSensorInfo,
+                     calibratedSensorToken,
+                     "calibrated sensor info by sensor token");
 }
 
 CalibratedSensorName
 MetaDataReader::getSensorName(const Token& sensorToken) const
 {
-  return findOrThrow(sensorToken2CalibratedSensorName, sensorToken, "sensor name by sensor token");
+  return findOrThrow(sensorToken2CalibratedSensorName,
+                     sensorToken,
+                     "sensor name by sensor token");
 }
 
 std::vector<CalibratedSensorInfoAndName>
@@ -332,13 +338,14 @@ MetaDataReader::getSceneCalibratedSensorInfo(const Token& sceneToken) const
 {
   std::vector<CalibratedSensorInfoAndName> sceneCalibratedSensorInfo;
   const auto& sceneCalibratedSensorInfoSet =
-    findOrThrow(scene2CalibratedSensorInfo, sceneToken, "calibrated sensor info by scene token");
+    findOrThrow(scene2CalibratedSensorInfo,
+                sceneToken,
+                "calibrated sensor info by scene token");
   std::copy(sceneCalibratedSensorInfoSet.begin(),
             sceneCalibratedSensorInfoSet.end(),
             std::back_inserter(sceneCalibratedSensorInfo));
   return sceneCalibratedSensorInfo;
 }
-
 
 boost::optional<SceneInfo>
 MetaDataReader::getSceneInfoByNumber(const uint32_t sceneNumber) const
@@ -351,6 +358,5 @@ MetaDataReader::getSceneInfoByNumber(const uint32_t sceneNumber) const
   }
   return sceneInfoOpt;
 }
-
 
 }

@@ -35,8 +35,7 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
                                const std::string& version,
                                const fs::path& outputRosbagPath,
                                int threadNumber,
-                               boost::optional<int32_t> sceneNumberOpt
-                               )
+                               boost::optional<int32_t> sceneNumberOpt)
 {
   if ((threadNumber < 1) || (threadNumber > 64)) {
     std::cout << "Forcing at least one job number (-j1)" << std::endl;
@@ -47,14 +46,15 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
 
   fs::path metadataPath = inDatasetPath;
   metadataPath /= fs::path(version); // Append sub-directory
-  std::cout << "Loading metadata from " + metadataPath.string() + " ..." << std::endl;
+  std::cout << "Loading metadata from " + metadataPath.string() + " ..."
+            << std::endl;
 
   try {
     // If file is not found, a runtime_error is thrown
-  metaDataReader.loadFromDirectory(metadataPath);
+    metaDataReader.loadFromDirectory(metadataPath);
   } catch (const runtime_error& e) {
-      std::cerr << "Error: " << e.what() << '\n';
-      std::exit(-1);
+    std::cerr << "Error: " << e.what() << '\n';
+    std::exit(-1);
   }
 
   cout << "Initializing " << threadNumber << " threads..." << endl;
@@ -75,15 +75,18 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
 
 #if BOOST_VERSION >= 106600
 
-  if(sceneNumberOpt) {
-    auto sceneInfoOpt = metaDataReader.getSceneInfoByNumber(sceneNumberOpt.value());
-    if(sceneInfoOpt) {
+  if (sceneNumberOpt) {
+    auto sceneInfoOpt =
+      metaDataReader.getSceneInfoByNumber(sceneNumberOpt.value());
+    if (sceneInfoOpt) {
       chosenSceneTokens.push_back(sceneInfoOpt->token);
     } else {
-      std::cout << "Scene with ID=" << sceneNumberOpt.value() << " not found!" << std::endl;
+      std::cout << "Scene with ID=" << sceneNumberOpt.value() << " not found!"
+                << std::endl;
     }
   } else {
-    chosenSceneTokens = metaDataReader.getAllSceneTokens();;
+    chosenSceneTokens = metaDataReader.getAllSceneTokens();
+    ;
   }
 
   for (const auto& sceneToken : chosenSceneTokens) {
@@ -97,12 +100,13 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
     });
   }
 
-  RunEvery<std::function<void()>> showProgress(std::chrono::milliseconds(1000), [&fileProgress]() {
-    std::cout << "Progress: "
-              << static_cast<int>(fileProgress.getProgressPercentage() * 100)
-              << "% [" << fileProgress.processedFiles << "/"
-              << fileProgress.toProcessFiles << "]" << std::endl;
-  });
+  RunEvery<std::function<void()>> showProgress(
+    std::chrono::milliseconds(1000), [&fileProgress]() {
+      std::cout << "Progress: "
+                << static_cast<int>(fileProgress.getProgressPercentage() * 100)
+                << "% [" << fileProgress.processedFiles << "/"
+                << fileProgress.toProcessFiles << "]" << std::endl;
+    });
 
   // TODO: replace check with futures
   while (fileProgress.processedFiles != fileProgress.toProcessFiles) {
@@ -114,32 +118,38 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
 
 #else
 
-  if(sceneNumberOpt) {
-    auto sceneInfoOpt = metaDataReader.getSceneInfoByNumber(sceneNumberOpt.value());
-    if(sceneInfoOpt) {
+  if (sceneNumberOpt) {
+    auto sceneInfoOpt =
+      metaDataReader.getSceneInfoByNumber(sceneNumberOpt.value());
+    if (sceneInfoOpt) {
       chosenSceneTokens.push_back(sceneInfoOpt->token);
     } else {
-      std::cout << "Scene with ID=" << sceneNumberOpt.value() << " not found!" << std::endl;
+      std::cout << "Scene with ID=" << sceneNumberOpt.value() << " not found!"
+                << std::endl;
     }
   } else {
-    chosenSceneTokens = metaDataReader.getAllSceneTokens();;
+    chosenSceneTokens = metaDataReader.getAllSceneTokens();
+    ;
   }
 
   int counter = 0;
 
   for (const auto& sceneToken : chosenSceneTokens) {
-    boost::shared_ptr<SceneConverter> sceneConverter = boost::make_shared<SceneConverter>(SceneConverter(metaDataReader));
+    boost::shared_ptr<SceneConverter> sceneConverter =
+      boost::make_shared<SceneConverter>(SceneConverter(metaDataReader));
     sceneConverter->submit(sceneToken, fileProgress);
     sceneConverters.push_back(std::move(sceneConverter));
 
     // Add task to FIFO queue.
     // If we use 4 threads then we finish converting 4 scenes to bag files
     // before starting to convert the 5th.
-    auto fn1 = [&, sceneConverters]()
-    {
+    auto fn1 = [&, sceneConverters]() {
       auto sceneInfo = metaDataReader.getSceneInfo(sceneToken);
-      std::cout << "Converting log " << counter << " of " << chosenSceneTokens.size() << ", " << sceneInfo->name << std::endl;
-      sceneConverters.back()->run(inDatasetPath, outputRosbagPath, fileProgress);
+      std::cout << "Converting log " << counter << " of "
+                << chosenSceneTokens.size() << ", " << sceneInfo->name
+                << std::endl;
+      sceneConverters.back()->run(
+        inDatasetPath, outputRosbagPath, fileProgress);
     };
     pool.enqueue(fn1);
 
@@ -155,8 +165,6 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
   }
 
 #endif
-
 }
 
 }
-

@@ -21,8 +21,6 @@ SceneConverter::SceneConverter(const MetaDataProvider& metaDataProvider)
   : metaDataProvider(metaDataProvider)
 {}
 
-
-
 boost::optional<SampleType>
 getSampleType(const std::string& filename)
 {
@@ -42,12 +40,10 @@ getSampleType(const std::string& filename)
   return boost::none;
 }
 
-
-
 template<typename T>
 void
 writeMsg(const std::string topicName,
-         const std::string &frameID,
+         const std::string& frameID,
          const TimeStamp timeStamp,
          rosbag::Bag& outBag,
          boost::optional<T> msgOpt)
@@ -66,7 +62,8 @@ void
 SceneConverter::submit(const Token& sceneToken, FileProgress& fileProgress)
 {
 
-  boost::optional<SceneInfo> sceneInfoOpt = metaDataProvider.getSceneInfo(sceneToken);
+  boost::optional<SceneInfo> sceneInfoOpt =
+    metaDataProvider.getSceneInfo(sceneToken);
   // if(!sceneInfoOpt) {
   //     // cout << "SceneInfo for " << sceneToken << " not found!" << endl;
   //     return;
@@ -109,7 +106,8 @@ SceneConverter::convertSampleDatas(rosbag::Bag& outBag,
   for (const auto& sampleData : sampleDatas) {
     fs::path sampleFilePath = inPath / sampleData.fileName;
 
-    boost::optional<SampleType> sampleTypeOpt = getSampleType(sampleFilePath.string());
+    boost::optional<SampleType> sampleTypeOpt =
+      getSampleType(sampleFilePath.string());
     if (!sampleTypeOpt) {
       continue;
     }
@@ -132,7 +130,7 @@ SceneConverter::convertSampleDatas(rosbag::Bag& outBag,
 
       // PointCloud format:
       auto msg = readLidarFile(sampleFilePath); // x,y,z,intensity
-      //auto msg = readLidarFileXYZIR(sampleFilePath); // x,y,z,intensity,ring
+      // auto msg = readLidarFileXYZIR(sampleFilePath); // x,y,z,intensity,ring
 
       writeMsg(topicName, sensorName, sampleData.timeStamp, outBag, msg);
 

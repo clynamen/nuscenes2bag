@@ -7,40 +7,45 @@ using namespace std;
 
 namespace nuscenes2bag {
 
-inline void fillFieldsForPointcloud(std::vector<PointField>& fields) {
-    PointField field;
-    field.datatype = sensor_msgs::PointField::FLOAT32;
-    field.offset = 0;
-    field.count = 1;
-    field.name = std::string("x");
-    fields.push_back(field);
+inline void
+fillFieldsForPointcloud(std::vector<PointField>& fields)
+{
+  PointField field;
+  field.datatype = sensor_msgs::PointField::FLOAT32;
+  field.offset = 0;
+  field.count = 1;
+  field.name = std::string("x");
+  fields.push_back(field);
 
-    field.datatype = sensor_msgs::PointField::FLOAT32;
-    field.offset = 4;
-    field.count = 1;
-    field.name = std::string("y");
-    fields.push_back(field);
+  field.datatype = sensor_msgs::PointField::FLOAT32;
+  field.offset = 4;
+  field.count = 1;
+  field.name = std::string("y");
+  fields.push_back(field);
 
-    field.datatype = sensor_msgs::PointField::FLOAT32;
-    field.offset = 8;
-    field.count = 1;
-    field.name = std::string("z");
-    fields.push_back(field);
+  field.datatype = sensor_msgs::PointField::FLOAT32;
+  field.offset = 8;
+  field.count = 1;
+  field.name = std::string("z");
+  fields.push_back(field);
 
-    field.datatype = sensor_msgs::PointField::FLOAT32;
-    field.offset = 12;
-    field.count = 1;
-    field.name = std::string("intensity");
-    fields.push_back(field);
+  field.datatype = sensor_msgs::PointField::FLOAT32;
+  field.offset = 12;
+  field.count = 1;
+  field.name = std::string("intensity");
+  fields.push_back(field);
 }
 
 // Convert float32 to 4 bytes
-union {
-    float value;
-    uint8_t byte[4];
+union
+{
+  float value;
+  uint8_t byte[4];
 } floatToBytes;
 
-inline void push_back_float32(std::vector<uint8_t>& data, float float_data) {
+inline void
+push_back_float32(std::vector<uint8_t>& data, float float_data)
+{
 
   /*
   // dereferencing type-punned pointer will break strict-aliasing rules
@@ -57,7 +62,9 @@ inline void push_back_float32(std::vector<uint8_t>& data, float float_data) {
   data.push_back(floatToBytes.byte[3]);
 }
 
-inline std::vector<float> readBinaryPcdFile(std::ifstream& fin) {
+inline std::vector<float>
+readBinaryPcdFile(std::ifstream& fin)
+{
   std::vector<float> fileValues;
   uint8_t skipCounter = 0;
   float f;
@@ -74,7 +81,8 @@ inline std::vector<float> readBinaryPcdFile(std::ifstream& fin) {
   return fileValues;
 }
 
-boost::optional<sensor_msgs::PointCloud2> readLidarFile(const fs::path& filePath)
+boost::optional<sensor_msgs::PointCloud2>
+readLidarFile(const fs::path& filePath)
 {
 
   PointCloud2 cloud;
@@ -87,7 +95,7 @@ boost::optional<sensor_msgs::PointCloud2> readLidarFile(const fs::path& filePath
     std::ifstream fin(filePath.string(), std::ios::binary);
     const std::vector<float> fileValues = readBinaryPcdFile(fin);
 
-    if(fileValues.size() % 4 != 0) {
+    if (fileValues.size() % 4 != 0) {
       throw UnableToParseFileException(filePath.string());
     }
     const size_t pointsNumber = fileValues.size() / 4;
@@ -106,11 +114,9 @@ boost::optional<sensor_msgs::PointCloud2> readLidarFile(const fs::path& filePath
     PRINT_EXCEPTION(e);
 
     return boost::none;
-
   }
 
   return boost::optional<sensor_msgs::PointCloud2>(cloud);
-
 }
 
 }
