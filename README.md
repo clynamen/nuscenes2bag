@@ -1,6 +1,7 @@
 # nuScenes2Bag
 
-![](https://github.com/clynamen/nuscenes2bag/workflows/ROS%20CI/badge.svg)
+ - Ubuntu 18.04 Melodic: ![](https://github.com/clynamen/nuscenes2bag/workflows/ubuntu_1804_melodic/badge.svg)
+ - Ubuntu 16.04 Kinetic: ![](https://github.com/clynamen/nuscenes2bag/workflows/ubuntu_1604_kinetic/badge.svg)
 
 Simple C++ tool for converting the [nuScenes](https://www.nuscenes.org/) dataset from [Aptiv](https://www.aptiv.com).
 
