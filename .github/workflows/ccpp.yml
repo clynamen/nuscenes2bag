@@ -1,4 +1,4 @@
-name: ROS CI
+name: ubuntu_1804_melodic
 
 on: [push]
 

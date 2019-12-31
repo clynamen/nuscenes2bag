@@ -73,5 +73,5 @@ Built using:
 
 ## Authors
 
-[clynamen](https://github.com/clynamen/)
-[ChernoA](https://github.com/ChernoA)
+ - [clynamen](https://github.com/clynamen/)
+ - [ChernoA](https://github.com/ChernoA)
