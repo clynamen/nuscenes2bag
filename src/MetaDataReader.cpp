@@ -60,13 +60,9 @@ MetaDataReader::loadFromDirectory(const fs::path& directoryPath)
   // and (scene.token -> calibratedSensor[]) map
   std::map<Token, Token> egoPoseToken2sceneToken;
 
-#if CMAKE_CXX_STANDARD >= 17
-  for (const auto& [sceneToken, sampleInfos] : scene2Samples) {
-#else
   for (const auto& keyvalue : scene2Samples) {
     const Token& sceneToken = keyvalue.first;
     const std::vector<SampleInfo>& sampleInfos = keyvalue.second;
-#endif
 
     for (const auto& sampleInfo : sampleInfos) {
       for (const auto& sampleData : sample2SampleData[sampleInfo.token]) {
@@ -236,19 +232,10 @@ MetaDataReader::loadCalibratedSensorInfo(const fs::path& filePath)
       calibratedSensorJson["sensor_token"],
       { translation[0], translation[1], translation[2] },
       { rotation[0], rotation[1], rotation[2], rotation[3] },
-
-#if CMAKE_CXX_STANDARD < 17
-      {} // IntrinsicsMatrix
-#endif
-
+      boost::none
     };
 
-#if CMAKE_CXX_STANDARD >= 17
-    std::optional<json::json> sensor_intrinsics =
-#else
-    json::json sensor_intrinsics =
-#endif
-      calibratedSensorJson["rotation"];
+    boost::optional<json::json> sensor_intrinsics = calibratedSensorJson["rotation"];
 
     calibratedSensorToken2CalibratedSensorInfo.emplace(token,
                                                        calibratedSensorInfo);
@@ -286,11 +273,7 @@ MetaDataReader::getAllSceneTokens() const
   return tokens;
 }
 
-#if CMAKE_CXX_STANDARD >= 17
-std::optional<SceneInfo> MetaDataReader::getSceneInfo(const Token& sceneToken) const
-#else
-boost::shared_ptr<SceneInfo> MetaDataReader::getSceneInfo(const Token& sceneToken) const
-#endif
+boost::optional<SceneInfo> MetaDataReader::getSceneInfo(const Token& sceneToken) const
 {
   assert(loadFromDirectoryCalled);
   auto it = std::find_if(
@@ -299,19 +282,10 @@ boost::shared_ptr<SceneInfo> MetaDataReader::getSceneInfo(const Token& sceneToke
     });
   if (it == scenes.end()) {
 
-#if CMAKE_CXX_STANDARD >= 17
-    return std::nullopt;
-#else
-    return nullptr;
-#endif
-
+    return boost::none;
   }
 
-#if CMAKE_CXX_STANDARD >= 17
-  return std::optional(*it);
-#else
-  return boost::make_shared<SceneInfo>(*it);
-#endif
+  return boost::optional<SceneInfo>(*it);
 
 }
 
@@ -365,12 +339,11 @@ MetaDataReader::getSceneCalibratedSensorInfo(const Token& sceneToken) const
   return sceneCalibratedSensorInfo;
 }
 
-#if CMAKE_CXX_STANDARD >= 17
 
-std::optional<SceneInfo>
+boost::optional<SceneInfo>
 MetaDataReader::getSceneInfoByNumber(const uint32_t sceneNumber) const
 {
-  std::optional<SceneInfo> sceneInfoOpt;
+  boost::optional<SceneInfo> sceneInfoOpt;
   for (const auto& scene : scenes) {
     if (scene.sceneId == sceneNumber) {
       sceneInfoOpt = scene;
@@ -378,22 +351,6 @@ MetaDataReader::getSceneInfoByNumber(const uint32_t sceneNumber) const
   }
   return sceneInfoOpt;
 }
-
-#else
-
-boost::shared_ptr<SceneInfo> MetaDataReader::getSceneInfoByNumber(const uint32_t sceneNumber) const
-{
-  boost::shared_ptr<SceneInfo> sceneInfo;
-  for (const auto& scene : scenes) {
-    if (scene.sceneId == sceneNumber) {
-      sceneInfo = boost::make_shared<SceneInfo>(scene);
-    }
-  }
-  return sceneInfo;
-}
-
-#endif
-
 
 
 }

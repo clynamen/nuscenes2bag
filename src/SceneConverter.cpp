@@ -22,59 +22,37 @@ SceneConverter::SceneConverter(const MetaDataProvider& metaDataProvider)
 {}
 
 
-#if CMAKE_CXX_STANDARD >= 17
 
-std::optional<SampleType>
-getSampleType(const std::string_view filename)
+boost::optional<SampleType>
+getSampleType(const std::string& filename)
 {
   std::array<std::pair<const char*, SampleType>, 3> pairs = {
     { { "CAM", SampleType::CAMERA },
       { "RADAR", SampleType::RADAR },
       { "LIDAR", SampleType::LIDAR } }
   };
-  for (const auto& [str, SampleType] : pairs) {
+  for (const auto& strAndSampleType : pairs) {
+    const auto& str = strAndSampleType.first;
+    const auto& sampleType = strAndSampleType.second;
     if (filename.find(str) != string::npos) {
-      return std::optional(SampleType);
+      return boost::optional<SampleType>(sampleType);
     }
   }
   cout << "Unknown file " << filename << endl;
-  return std::nullopt;
+  return boost::none;
 }
 
-#else
 
-SampleType getSampleType(const std::string &filename)
-{
-  std::array<std::pair<const char*, SampleType>, 3> pairs = {
-    { { "CAM", SampleType::CAMERA },
-      { "RADAR", SampleType::RADAR },
-      { "LIDAR", SampleType::LIDAR } }
-  };
-  for (const auto& keyvalue : pairs) {
-    const char* str = keyvalue.first;
-    const SampleType& type = keyvalue.second;
-    if (filename.find(str) != string::npos) {
-      return type;
-    }
-  }
-  cout << "Unknown file " << filename << endl;
-
-  return SampleType::NONE;
-}
-
-#endif
-
-#if CMAKE_CXX_STANDARD >= 17
 
 template<typename T>
 void
-writeMsg(const std::string_view topicName,
+writeMsg(const std::string topicName,
          const std::string &frameID,
          const TimeStamp timeStamp,
          rosbag::Bag& outBag,
-         std::optional<T> msgOpt)
+         boost::optional<T> msgOpt)
 {
-  if (msgOpt.has_value()) {
+  if (msgOpt) {
     auto& msg = msgOpt.value();
     msg.header.frame_id = frameID;
     msg.header.stamp = stampUs2RosTime(timeStamp);
@@ -82,42 +60,19 @@ writeMsg(const std::string_view topicName,
   }
 }
 
-#else
-
-template<typename T> void writeMsg(const std::string &topicName,
-                                   const std::string &frameID,
-                                   const TimeStamp timeStamp,
-                                   rosbag::Bag& outBag,
-                                   T msg)
-{
-  if (msg) {
-    msg->header.frame_id = frameID;
-    msg->header.stamp = stampUs2RosTime(timeStamp);
-    outBag.write(std::string(topicName).c_str(), msg->header.stamp, msg);
-  }
-}
-
-#endif
-
 static const std::regex TOPIC_REGEX = std::regex(".*__([A-Z_]+)__.*");
 
 void
 SceneConverter::submit(const Token& sceneToken, FileProgress& fileProgress)
 {
 
-#if CMAKE_CXX_STANDARD >= 17
-  std::optional sceneInfoOpt = metaDataProvider.getSceneInfo(sceneToken);
-  // if(!sceneInfoOpt.has_value()) {
+  boost::optional<SceneInfo> sceneInfoOpt = metaDataProvider.getSceneInfo(sceneToken);
+  // if(!sceneInfoOpt) {
   //     // cout << "SceneInfo for " << sceneToken << " not found!" << endl;
   //     return;
   // }
-  assert(sceneInfoOpt.has_value());
+  assert(sceneInfoOpt);
   SceneInfo& sceneInfo = sceneInfoOpt.value();
-#else
-  boost::shared_ptr<SceneInfo> sceneInfoPtr = metaDataProvider.getSceneInfo(sceneToken);
-  assert(sceneInfoPtr != nullptr);
-  SceneInfo& sceneInfo = *sceneInfoPtr;
-#endif
 
   sceneId = sceneInfo.sceneId;
   this->sceneToken = sceneToken;
@@ -154,15 +109,11 @@ SceneConverter::convertSampleDatas(rosbag::Bag& outBag,
   for (const auto& sampleData : sampleDatas) {
     fs::path sampleFilePath = inPath / sampleData.fileName;
 
-#if CMAKE_CXX_STANDARD >= 17
-    std::optional<SampleType> sampleTypeOpt = getSampleType(sampleFilePath.string());
-    if (!sampleTypeOpt.has_value()) {
+    boost::optional<SampleType> sampleTypeOpt = getSampleType(sampleFilePath.string());
+    if (!sampleTypeOpt) {
       continue;
     }
     SampleType& sampleType = sampleTypeOpt.value();
-#else
-    SampleType sampleType = getSampleType(sampleFilePath.string());
-#endif
 
     CalibratedSensorInfo calibratedSensorInfo =
       metaDataProvider.getCalibratedSensorInfo(

@@ -6,12 +6,7 @@
 #include "nuscenes2bag/SceneConverter.hpp"
 #include "nuscenes2bag/utils.hpp"
 
-#if CMAKE_CXX_STANDARD >= 17
-// We use std::filesystem and std::optional from C++17, and std::unique_ptr from C++14
 #include <memory> // std::unique_ptr
-#else
-#include <boost/make_shared.hpp>
-#endif
 
 #include <boost/asio.hpp>
 
@@ -40,11 +35,7 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
                                const std::string& version,
                                const fs::path& outputRosbagPath,
                                int threadNumber,
-#if CMAKE_CXX_STANDARD >= 17
-                               std::optional<int32_t> sceneNumberOpt
-#else
-                               int32_t sceneNumber
-#endif
+                               boost::optional<int32_t> sceneNumberOpt
                                )
 {
   if ((threadNumber < 1) || (threadNumber > 64)) {
@@ -68,7 +59,7 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
 
   cout << "Initializing " << threadNumber << " threads..." << endl;
 
-#if (CMAKE_CXX_STANDARD >= 17) && (BOOST_VERSION >= 106600)
+#if BOOST_VERSION >= 106600
   boost::asio::thread_pool pool(threadNumber);
   std::vector<std::unique_ptr<SceneConverter>> sceneConverters;
 #else
@@ -82,11 +73,11 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
 
   std::vector<Token> chosenSceneTokens;
 
-#if (CMAKE_CXX_STANDARD >= 17) && (BOOST_VERSION >= 106600)
+#if BOOST_VERSION >= 106600
 
-  if(sceneNumberOpt.has_value()) {
+  if(sceneNumberOpt) {
     auto sceneInfoOpt = metaDataReader.getSceneInfoByNumber(sceneNumberOpt.value());
-    if(sceneInfoOpt.has_value()) {
+    if(sceneInfoOpt) {
       chosenSceneTokens.push_back(sceneInfoOpt->token);
     } else {
       std::cout << "Scene with ID=" << sceneNumberOpt.value() << " not found!" << std::endl;
@@ -106,7 +97,7 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
     });
   }
 
-  RunEvery showProgress(std::chrono::milliseconds(1000), [&fileProgress]() {
+  RunEvery<std::function<void()>> showProgress(std::chrono::milliseconds(1000), [&fileProgress]() {
     std::cout << "Progress: "
               << static_cast<int>(fileProgress.getProgressPercentage() * 100)
               << "% [" << fileProgress.processedFiles << "/"
@@ -123,19 +114,15 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
 
 #else
 
-  if (sceneNumber > 0) {
-    boost::shared_ptr<SceneInfo> sceneInfo = metaDataReader.getSceneInfoByNumber(sceneNumber);
-    if(sceneInfo) {
-      std::cout << "Found scene number: " << sceneNumber
-                << "  name: " << sceneInfo->name
-                << std::endl;
-      chosenSceneTokens.push_back(sceneInfo->token);
+  if(sceneNumberOpt) {
+    auto sceneInfoOpt = metaDataReader.getSceneInfoByNumber(sceneNumberOpt.value());
+    if(sceneInfoOpt) {
+      chosenSceneTokens.push_back(sceneInfoOpt->token);
     } else {
-      std::cout << "Scene with ID=" << sceneNumber << " not found!" << std::endl;
+      std::cout << "Scene with ID=" << sceneNumberOpt.value() << " not found!" << std::endl;
     }
   } else {
-    chosenSceneTokens = metaDataReader.getAllSceneTokens();
-    std::cout << "Found " << chosenSceneTokens.size() << " scenes in directory" << std::endl;
+    chosenSceneTokens = metaDataReader.getAllSceneTokens();;
   }
 
   int counter = 0;

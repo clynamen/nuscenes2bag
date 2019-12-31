@@ -3,9 +3,7 @@
 #include <exception>
 #include <vector>
 
-#if CMAKE_CXX_STANDARD >= 17
-#include <optional>
-#endif
+#include <boost/optional.hpp>
 
 namespace nuscenes2bag {
 
@@ -16,17 +14,8 @@ public:
 
   virtual std::vector<Token> getAllSceneTokens() const = 0;
 
-#if CMAKE_CXX_STANDARD >= 17
-  virtual std::optional<SceneInfo> getSceneInfo(const Token& sceneToken) const = 0;
-#else
-  virtual boost::shared_ptr<SceneInfo> getSceneInfo(const Token& sceneToken) const = 0;
-#endif
-
-#if CMAKE_CXX_STANDARD >= 17
-  virtual std::optional<SceneInfo> getSceneInfoByNumber(const uint32_t sceneNumber) const = 0;
-#else
-  virtual boost::shared_ptr<SceneInfo> getSceneInfoByNumber(const uint32_t sceneNumber) const = 0;
-#endif
+  virtual boost::optional<SceneInfo> getSceneInfo(const Token& sceneToken) const = 0;
+  virtual boost::optional<SceneInfo> getSceneInfoByNumber(const uint32_t sceneNumber) const = 0;
 
   virtual std::vector<SampleDataInfo> getSceneSampleData(
     const Token& sceneSampleData) const = 0;

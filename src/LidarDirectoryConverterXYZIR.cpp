@@ -66,11 +66,7 @@ inline std::vector<float> readBinaryPcdFileXYZIR(std::ifstream& fin) {
   return fileValues;
 }
 
-#if CMAKE_CXX_STANDARD >= 17
-std::optional<sensor_msgs::PointCloud2> readLidarFileXYZIR(const fs::path& filePath)
-#else
-sensor_msgs::PointCloud2Ptr readLidarFileXYZIR(const fs::path& filePath)
-#endif
+boost::optional<sensor_msgs::PointCloud2> readLidarFileXYZIR(const fs::path& filePath)
 {
 
   PointCloud2 cloud;
@@ -101,20 +97,10 @@ sensor_msgs::PointCloud2Ptr readLidarFileXYZIR(const fs::path& filePath)
   } catch (const std::exception& e) {
     PRINT_EXCEPTION(e);
 
-#if CMAKE_CXX_STANDARD >= 17
-    return std::nullopt;
-#else
-    sensor_msgs::PointCloud2Ptr empty_msg;
-    return empty_msg;
-#endif
-
+    return boost::none;
   }
 
-#if CMAKE_CXX_STANDARD >= 17
-  return std::optional(cloud);
-#else
-  return boost::make_shared<sensor_msgs::PointCloud2>(cloud);
-#endif
+  return boost::optional<sensor_msgs::PointCloud2>(cloud);
 
 }
 
