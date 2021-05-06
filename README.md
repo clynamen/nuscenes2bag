@@ -44,7 +44,9 @@ rosrun nuscenes2bag nuscenes2bag --dataroot /path/to/nuscenes_mini_meta_v1.0/ --
 ```
 
 Convert one scene to a bag file with compressed images:
+```
 rosrun nuscenes2bag nuscenes2bag -c --scene_number 0061 --dataroot /path/to/nuscenes_mini_meta_v1.0/ --out nuscenes_bags/
+```
 
 **Converting other datasets:**
 
