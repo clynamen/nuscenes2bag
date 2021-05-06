@@ -21,8 +21,11 @@ The tool is a normal ROS package. Place it under a workspace and build it with c
 ## Usage
 
 **Command-line arguments:**
-`--dataroot`: The path to the directory that contains the 'maps', 'samples' and 'sweeps'.
+`--dataroot,-s`: The path to the directory that contains the 'maps', 'samples' and 'sweeps'.
 `--version`: (optional) The sub-directory that contains the metadata .json files. Default = "v1.0-mini"
+`--scene_number,-n`: (optional) Only convert a given scene
+`--compress,-c`: (optional) whether to use compressed images to reduce file size
+
 
 
 **Converting the 'mini' dataset:**
@@ -40,6 +43,8 @@ This processes 4 scenes simultaneously, however the scene numbers are not proces
 rosrun nuscenes2bag nuscenes2bag --dataroot /path/to/nuscenes_mini_meta_v1.0/ --out nuscenes_bags/ --jobs 4
 ```
 
+Convert one scene to a bag file with compressed images:
+rosrun nuscenes2bag nuscenes2bag -c --scene_number 0061 --dataroot /path/to/nuscenes_mini_meta_v1.0/ --out nuscenes_bags/
 
 **Converting other datasets:**
 
