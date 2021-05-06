@@ -15,6 +15,7 @@ main(const int argc, const char* argv[])
     std::string outputBagName;
     int32_t threadNumber = -1;
     int32_t sceneNumber = -1;
+    bool compressImgs = false;
 
     options_description desc{ "Options" };
     desc.add_options()("help,h", "show help");
@@ -32,7 +33,10 @@ main(const int argc, const char* argv[])
       "out,o", value<std::string>(&outputBagName), "output bag name")(
       "jobs,j",
       value<int32_t>(&threadNumber),
-      "number of jobs (thread number)");
+      "number of jobs (thread number)")(
+      "compress,c",
+      bool_switch(&compressImgs),
+      "whether to use compressed images to reduce file size");
     variables_map vm;
 
     desc.add(inputDesc);
@@ -52,7 +56,7 @@ main(const int argc, const char* argv[])
         sceneNumberOpt = sceneNumber;
       }
       converter.convertDirectory(
-        sampleDirPath, version, outputBagName, threadNumber, sceneNumberOpt);
+        sampleDirPath, version, outputBagName, threadNumber, sceneNumberOpt, compressImgs);
     }
   } catch (const error& ex) {
     std::cerr << ex.what() << '\n';
