@@ -9,7 +9,7 @@ namespace nuscenes2bag {
 
 class SceneConverter {
     public:
-    SceneConverter(const MetaDataProvider& metaDataProvider);
+    SceneConverter(const MetaDataProvider& metaDataProvider, bool compressImgs);
 
     void submit(const Token& sceneToken, FileProgress& fileProgress);
 
@@ -25,6 +25,7 @@ class SceneConverter {
     std::vector<EgoPoseInfo> egoPoseInfos;
     SceneId sceneId;
     Token sceneToken;
+    bool compressImgs;
 };
 
 }

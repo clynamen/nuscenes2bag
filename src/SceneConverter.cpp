@@ -17,8 +17,8 @@ using namespace std;
 
 namespace nuscenes2bag {
 
-SceneConverter::SceneConverter(const MetaDataProvider& metaDataProvider)
-  : metaDataProvider(metaDataProvider)
+SceneConverter::SceneConverter(const MetaDataProvider& metaDataProvider, bool compressImgs)
+  : metaDataProvider(metaDataProvider), compressImgs(compressImgs)
 {}
 
 boost::optional<SampleType>
@@ -121,9 +121,16 @@ SceneConverter::convertSampleDatas(rosbag::Bag& outBag,
     std::string sensorName = toLower(calibratedSensorName.name);
 
     if (sampleType == SampleType::CAMERA) {
-      auto topicName = sensorName + "/raw";
-      auto msg = readImageFile(sampleFilePath);
-      writeMsg(topicName, sensorName, sampleData.timeStamp, outBag, msg);
+      if (compressImgs) {
+        auto topicName = sensorName + "/compressed";
+        auto msg = readImageFileCompressed(sampleFilePath);
+        writeMsg(topicName, sensorName, sampleData.timeStamp, outBag, msg);
+      }
+      else {
+        auto topicName = sensorName + "/raw";
+        auto msg = readImageFile(sampleFilePath);
+        writeMsg(topicName, sensorName, sampleData.timeStamp, outBag, msg);
+      }
 
     } else if (sampleType == SampleType::LIDAR) {
       auto topicName = sensorName;

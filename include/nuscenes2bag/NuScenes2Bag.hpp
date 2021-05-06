@@ -19,7 +19,8 @@ public:
                         const std::string& version,
                         const fs::path &outputRosbagPath,
                         int32_t threadNumber,
-                        boost::optional<int32_t> sceneNumberOpt
+                        boost::optional<int32_t> sceneNumberOpt,
+                        bool compressImgs
                         );
 
 private:

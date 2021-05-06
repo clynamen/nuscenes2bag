@@ -35,7 +35,8 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
                                const std::string& version,
                                const fs::path& outputRosbagPath,
                                int threadNumber,
-                               boost::optional<int32_t> sceneNumberOpt)
+                               boost::optional<int32_t> sceneNumberOpt,
+                               bool compressImgs)
 {
   if ((threadNumber < 1) || (threadNumber > 64)) {
     std::cout << "Forcing at least one job number (-j1)" << std::endl;
@@ -91,7 +92,7 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
 
   for (const auto& sceneToken : chosenSceneTokens) {
     std::unique_ptr<SceneConverter> sceneConverter =
-      std::make_unique<SceneConverter>(metaDataReader);
+      std::make_unique<SceneConverter>(metaDataReader, compressImgs);
     sceneConverter->submit(sceneToken, fileProgress);
     SceneConverter* sceneConverterPtr = sceneConverter.get();
     sceneConverters.push_back(std::move(sceneConverter));
@@ -136,7 +137,7 @@ NuScenes2Bag::convertDirectory(const fs::path& inDatasetPath,
 
   for (const auto& sceneToken : chosenSceneTokens) {
     boost::shared_ptr<SceneConverter> sceneConverter =
-      boost::make_shared<SceneConverter>(SceneConverter(metaDataReader));
+      boost::make_shared<SceneConverter>(SceneConverter(metaDataReader, compressImgs));
     sceneConverter->submit(sceneToken, fileProgress);
     sceneConverters.push_back(std::move(sceneConverter));
 

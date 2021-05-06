@@ -22,4 +22,22 @@ readImageFile(const fs::path& filePath) noexcept
   return boost::none;
 }
 
+boost::optional<sensor_msgs::CompressedImage>
+readImageFileCompressed(const fs::path& filePath) noexcept
+{
+  cv::Mat image;
+  try {
+    image = imread(filePath.string().c_str(), cv::IMREAD_COLOR);
+    sensor_msgs::CompressedImagePtr msg =
+      cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toCompressedImageMsg();
+
+    return boost::optional<sensor_msgs::CompressedImage>(*msg);
+
+  } catch (const std::exception& e) {
+    PRINT_EXCEPTION(e);
+  }
+
+  return boost::none;
+}
+
 }

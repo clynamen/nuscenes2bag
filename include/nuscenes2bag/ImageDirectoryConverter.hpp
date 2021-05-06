@@ -14,4 +14,6 @@ namespace nuscenes2bag {
 
 boost::optional<sensor_msgs::Image> readImageFile(const fs::path& filePath) noexcept;
 
+boost::optional<sensor_msgs::CompressedImage> readImageFileCompressed(const fs::path& filePath) noexcept;
+
 }
